@@ -1,0 +1,398 @@
+diff --git a/node_modules/react-native-calendars/src/calendar/day/basic/style.js b/node_modules/react-native-calendars/src/calendar/day/basic/style.js
+index 11711a0..1647d09 100644
+--- a/node_modules/react-native-calendars/src/calendar/day/basic/style.js
++++ b/node_modules/react-native-calendars/src/calendar/day/basic/style.js
+@@ -9,21 +9,23 @@ export default function styleConstructor(theme = {}) {
+             alignItems: 'center'
+         },
+         base: {
+-            width: 32,
+-            height: 32,
++            width: 28,
++            height: 28,
+             alignItems: 'center'
+         },
+         text: {
+-            marginTop: constants.isAndroid ? 4 : 6,
++            marginTop: constants.isAndroid ? 5 : 3,
+             fontSize: appStyle.textDayFontSize,
+             fontFamily: appStyle.textDayFontFamily,
+             fontWeight: appStyle.textDayFontWeight,
+             color: appStyle.dayTextColor,
+             backgroundColor: 'rgba(255, 255, 255, 0)',
++            fontFamily: "Raleway-Bold",
++            includeFontPadding: false,
+             ...appStyle.textDayStyle
+         },
+         alignedText: {
+-            marginTop: constants.isAndroid ? 4 : 6
++            marginTop: constants.isAndroid ? 5 : 5
+         },
+         selected: {
+             backgroundColor: appStyle.selectedDayBackgroundColor,
+diff --git a/node_modules/react-native-calendars/src/calendar/day/period/index.js b/node_modules/react-native-calendars/src/calendar/day/period/index.js
+index 7c08fde..d53ec05 100644
+--- a/node_modules/react-native-calendars/src/calendar/day/period/index.js
++++ b/node_modules/react-native-calendars/src/calendar/day/period/index.js
+@@ -5,6 +5,9 @@ import { TouchableWithoutFeedback, TouchableOpacity, Text, View } from 'react-na
+ import { xdateToData } from '../../../interface';
+ import styleConstructor from './style';
+ import Dot from '../dot';
++import { backgroundColor } from 'react-native-calendars/src/style';
++import constants from '../../../commons/constants';
++
+ const PeriodDay = (props) => {
+     const { theme, marking, date, onPress, onLongPress, state, accessibilityLabel, testID, children } = props;
+     const dateData = date ? xdateToData(new XDate(date)) : undefined;
+@@ -40,7 +43,7 @@ const PeriodDay = (props) => {
+                 defaultStyle.textStyle = marking.customTextStyle;
+             }
+             if (marking.customContainerStyle) {
+-                defaultStyle.containerStyle = marking.customContainerStyle;
++                defaultStyle.containerStyle = marking.customStyles;
+             }
+             return defaultStyle;
+         }
+@@ -88,30 +91,35 @@ const PeriodDay = (props) => {
+         return textStyle;
+     }, [marking, state]);
+     const fillerStyles = useMemo(() => {
+-        const leftFillerStyle = { backgroundColor: undefined };
+-        const rightFillerStyle = { backgroundColor: undefined };
++        let leftFillerStyle = { backgroundColor: undefined };
++        let rightFillerStyle = { backgroundColor: undefined };
+         let fillerStyle = {};
++
+         const start = markingStyle.startingDay;
+         const end = markingStyle.endingDay;
+         if (start && !end) {
+             rightFillerStyle.backgroundColor = markingStyle.startingDay?.backgroundColor;
++            textStyle.push({ backgroundColor: '#B8EBF2', width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center', alignSelf: 'center', paddingTop: constants.isAndroid ? 0 : 4 })
+         }
+         else if (end && !start) {
+             leftFillerStyle.backgroundColor = markingStyle.endingDay?.backgroundColor;
++            textStyle.push({ backgroundColor: '#B8EBF2', width: '100%', height: '100%', textAlign: 'center', textAlignVertical: 'center', alignSelf: 'center', paddingTop: constants.isAndroid ? 0 : 4 })
+         }
+         else if (markingStyle.day) {
+             leftFillerStyle.backgroundColor = markingStyle.day?.backgroundColor;
+             rightFillerStyle.backgroundColor = markingStyle.day?.backgroundColor;
+             fillerStyle = { backgroundColor: markingStyle.day?.backgroundColor };
++
+         }
+         return { leftFillerStyle, rightFillerStyle, fillerStyle };
+     }, [marking]);
+     const renderFillers = () => {
+         if (marking) {
+             return (<View style={[style.current.fillers, fillerStyles.fillerStyle]}>
+-          <View style={[style.current.leftFiller, fillerStyles.leftFillerStyle]}/>
+-          <View style={[style.current.rightFiller, fillerStyles.rightFillerStyle]}/>
+-        </View>);
++                <View style={[style.current.leftFiller, fillerStyles.leftFillerStyle]} />
++                <View style={[style.current.rightFiller, fillerStyles.rightFillerStyle]} />
++            </View>
++            );
+         }
+     };
+     const _onPress = useCallback(() => {
+@@ -122,15 +130,15 @@ const PeriodDay = (props) => {
+     }, [onLongPress]);
+     const Component = marking ? TouchableWithoutFeedback : TouchableOpacity;
+     return (<Component testID={testID} onPress={_onPress} onLongPress={_onLongPress} disabled={marking?.disableTouchEvent} accessible accessibilityRole={marking?.disableTouchEvent ? undefined : 'button'} accessibilityLabel={accessibilityLabel}>
+-      <View style={style.current.wrapper}>
+-        {renderFillers()}
+-        <View style={containerStyle}>
+-          <Text allowFontScaling={false} style={textStyle}>
+-            {String(children)}
+-          </Text>
+-          <Dot theme={theme} color={marking?.dotColor} marked={marking?.marked}/>
++        <View style={style.current.wrapper}>
++            {renderFillers()}
++            <View style={containerStyle}>
++                <Text allowFontScaling={false} style={textStyle}>
++                    {String(children)}
++                </Text>
++                <Dot theme={theme} color={marking?.dotColor} marked={marking?.marked} />
++            </View>
+         </View>
+-      </View>
+     </Component>);
+ };
+ export default PeriodDay;
+diff --git a/node_modules/react-native-calendars/src/calendar/day/period/style.js b/node_modules/react-native-calendars/src/calendar/day/period/style.js
+index 465c11e..7872a06 100644
+--- a/node_modules/react-native-calendars/src/calendar/day/period/style.js
++++ b/node_modules/react-native-calendars/src/calendar/day/period/style.js
+@@ -1,18 +1,20 @@
+ import { StyleSheet } from 'react-native';
+ import * as defaultStyle from '../../../style';
+-const FILLER_HEIGHT = 34;
++const FILLER_HEIGHT = 28;
+ export default function styleConstructor(theme = {}) {
+     const appStyle = { ...defaultStyle, ...theme };
+     return StyleSheet.create({
+         wrapper: {
+             alignItems: 'center',
+             alignSelf: 'stretch',
+-            marginLeft: -1
++            marginLeft: -1,
++            justifyContent: 'center',
+         },
+         base: {
+-            width: 38,
++            width: 28,
+             height: FILLER_HEIGHT,
+-            alignItems: 'center'
++            alignItems: 'center',
++            justifyContent: 'center'
+         },
+         fillers: {
+             position: 'absolute',
+@@ -32,12 +34,14 @@ export default function styleConstructor(theme = {}) {
+             flex: 1
+         },
+         text: {
+-            marginTop: 7,
++            marginTop: 5,
+             fontSize: appStyle.textDayFontSize,
+             fontFamily: appStyle.textDayFontFamily,
+             fontWeight: appStyle.textDayFontWeight,
+             color: appStyle.dayTextColor,
+-            backgroundColor: 'rgba(255, 255, 255, 0)'
++            fontFamily: "Raleway-Bold",
++            includeFontPadding: false,
++            backgroundColor: 'rgba(255, 255, 255, 0)',
+         },
+         today: {
+             backgroundColor: appStyle.todayBackgroundColor
+@@ -47,7 +51,7 @@ export default function styleConstructor(theme = {}) {
+             color: theme.todayTextColor || appStyle.dayTextColor
+         },
+         selectedText: {
+-            color: appStyle.selectedDayTextColor
++            color: appStyle.selectedDayTextColor,
+         },
+         disabledText: {
+             color: appStyle.textDisabledColor
+diff --git a/node_modules/react-native-calendars/src/calendar/header/index.js b/node_modules/react-native-calendars/src/calendar/header/index.js
+index 5820017..10b104a 100644
+--- a/node_modules/react-native-calendars/src/calendar/header/index.js
++++ b/node_modules/react-native-calendars/src/calendar/header/index.js
+@@ -3,9 +3,10 @@ import XDate from 'xdate';
+ import React, { Fragment, useCallback, useMemo, forwardRef, useImperativeHandle, useRef } from 'react';
+ import { ActivityIndicator, Platform, View, Text, TouchableOpacity, Image } from 'react-native';
+ import { formatNumbers, weekDayNames } from '../../dateutils';
+-import { CHANGE_MONTH_LEFT_ARROW, CHANGE_MONTH_RIGHT_ARROW, HEADER_DAY_NAMES, HEADER_LOADING_INDICATOR, HEADER_MONTH_NAME
+-// @ts-expect-error
+- } from '../../testIDs';
++import {
++    CHANGE_MONTH_LEFT_ARROW, CHANGE_MONTH_RIGHT_ARROW, HEADER_DAY_NAMES, HEADER_LOADING_INDICATOR, HEADER_MONTH_NAME
++    // @ts-expect-error
++} from '../../testIDs';
+ import styleConstructor from './style';
+ const arrowHitSlop = { left: 20, right: 20, top: 20, bottom: 20 };
+ const accessibilityActions = [
+@@ -61,7 +62,9 @@ const CalendarHeader = forwardRef((props, ref) => {
+     const renderWeekDays = useMemo(() => {
+         const dayOfTheWeek = new XDate(current).getDay();
+         const weekDaysNames = numberOfDays > 1 ? weekDayNames(dayOfTheWeek) : weekDayNames(firstDay);
++        console.log(weekDaysNames)
+         const dayNames = numberOfDays > 1 ? weekDaysNames.slice(0, numberOfDays) : weekDaysNames;
++        console.log(dayNames)
+         return dayNames.map((day, index) => {
+             const dayStyle = [style.current.dayHeader];
+             if (includes(disabledDaysIndexes, index)) {
+@@ -74,8 +77,8 @@ const CalendarHeader = forwardRef((props, ref) => {
+                 dayStyle.push(style[dayTextAtIndex]);
+             }
+             return (<Text allowFontScaling={false} key={index} style={dayStyle} numberOfLines={1} accessibilityLabel={''}>
+-          {day}
+-        </Text>);
++                {day.substring(0, 2)}
++            </Text>);
+         });
+     }, [firstDay, current, numberOfDays]);
+     const _renderHeader = () => {
+@@ -87,10 +90,10 @@ const CalendarHeader = forwardRef((props, ref) => {
+             return customHeaderTitle;
+         }
+         return (<Fragment>
+-        <Text allowFontScaling={false} style={style.current.monthText} testID={testID ? `${HEADER_MONTH_NAME}-${testID}` : HEADER_MONTH_NAME} {...webProps}>
+-          {formatNumbers(month?.toString(monthFormat))}
+-        </Text>
+-      </Fragment>);
++            <Text allowFontScaling={false} style={style.current.monthText} testID={testID ? `${HEADER_MONTH_NAME}-${testID}` : HEADER_MONTH_NAME} {...webProps}>
++                {formatNumbers(month?.toString(monthFormat))}
++            </Text>
++        </Fragment>);
+     };
+     const _renderArrow = (direction) => {
+         if (hideArrows) {
+@@ -101,40 +104,41 @@ const CalendarHeader = forwardRef((props, ref) => {
+         const testId = testID ? `${id}-${testID}` : id;
+         const shouldDisable = isLeft ? disableArrowLeft : disableArrowRight;
+         const onPress = !shouldDisable ? isLeft ? onPressLeft : onPressRight : undefined;
+-        const imageSource = isLeft ? require('../img/previous.png') : require('../img/next.png');
++        const imageSource = isLeft ? require('../img/ic_calendar_arrow_left.png') : require('../img/ic_calendar_arrow_right.png');
+         const renderArrowDirection = isLeft ? 'left' : 'right';
++
+         return (<TouchableOpacity onPress={onPress} disabled={shouldDisable} style={style.current.arrow} hitSlop={arrowHitSlop} testID={testId}>
+-        {renderArrow ? (renderArrow(renderArrowDirection)) : (<Image source={imageSource} style={shouldDisable ? style.current.disabledArrowImage : style.current.arrowImage}/>)}
+-      </TouchableOpacity>);
++            {renderArrow ? (renderArrow(renderArrowDirection)) : (<Image source={imageSource} style={shouldDisable ? style.current.disabledArrowImage : style.current.arrowImage} />)}
++        </TouchableOpacity>);
+     };
+     const renderIndicator = () => {
+         if (displayLoadingIndicator) {
+-            return (<ActivityIndicator color={theme?.indicatorColor} testID={testID ? `${HEADER_LOADING_INDICATOR}-${testID}` : HEADER_LOADING_INDICATOR}/>);
++            return (<ActivityIndicator color={theme?.indicatorColor} testID={testID ? `${HEADER_LOADING_INDICATOR}-${testID}` : HEADER_LOADING_INDICATOR} />);
+         }
+     };
+     const renderWeekNumbersSpace = () => {
+-        return showWeekNumbers && <View style={style.current.dayHeader}/>;
++        return showWeekNumbers && <View style={style.current.dayHeader} />;
+     };
+     const renderDayNames = () => {
+         if (!hideDayNames) {
+             return (<View style={dayNamesStyle} testID={testID ? `${HEADER_DAY_NAMES}-${testID}` : HEADER_DAY_NAMES}>
+-          {renderWeekNumbersSpace()}
+-          {renderWeekDays}
+-        </View>);
++                {renderWeekNumbersSpace()}
++                {renderWeekDays}
++            </View>);
+         }
+     };
+     return (<View testID={testID} style={propsStyle} accessible accessibilityRole={'adjustable'} accessibilityActions={accessibilityActions} onAccessibilityAction={onAccessibilityAction} accessibilityElementsHidden={accessibilityElementsHidden} // iOS
+-     importantForAccessibility={importantForAccessibility} // Android
++        importantForAccessibility={importantForAccessibility} // Android
+     >
+-      <View style={headerStyle}>
+-        {_renderArrow('left')}
+-        <View style={style.current.headerContainer}>
+-          {_renderHeader()}
+-          {renderIndicator()}
++        <View style={headerStyle}>
++            {_renderArrow('left')}
++            <View style={style.current.headerContainer}>
++                {_renderHeader()}
++                {renderIndicator()}
++            </View>
++            {_renderArrow('right')}
+         </View>
+-        {_renderArrow('right')}
+-      </View>
+-      {renderDayNames()}
++        {renderDayNames()}
+     </View>);
+ });
+ export default CalendarHeader;
+diff --git a/node_modules/react-native-calendars/src/calendar/header/style.js b/node_modules/react-native-calendars/src/calendar/header/style.js
+index 9d5a139..e239511 100644
+--- a/node_modules/react-native-calendars/src/calendar/header/style.js
++++ b/node_modules/react-native-calendars/src/calendar/header/style.js
+@@ -14,33 +14,33 @@ export default function (theme = {}) {
+             alignItems: 'center',
+         },
+         partialHeader: {
+-            paddingHorizontal: 15
++            paddingHorizontal: 15,
++            alignItems: 'center',
++            justifyContent: 'center',
+         },
+         headerContainer: {
+-            flexDirection: 'row'
++            flexDirection: 'row',
++            alignItems: 'center',
++            justifyContent: 'center',
+         },
+         monthText: {
+-            fontSize: appStyle.textMonthFontSize,
+-            fontFamily: appStyle.textMonthFontFamily,
++            fontSize: 16,
+             fontWeight: appStyle.textMonthFontWeight,
+             color: appStyle.monthTextColor,
+-            margin: 10
++            margin: 10,
++            fontFamily: 'Raleway-Bold'
+         },
+         arrow: {
+             padding: 10,
+             ...appStyle.arrowStyle
+         },
+         arrowImage: {
+-            ...rtlStyle,
+-            tintColor: appStyle.arrowColor,
+-            ...Platform.select({
+-                web: {
+-                    width: appStyle.arrowWidth,
+-                    height: appStyle.arrowHeight
+-                }
+-            })
++            width: 10,
++            height: 12,
+         },
+         disabledArrowImage: {
++            width: 10,
++            height: 12,
+             ...rtlStyle,
+             tintColor: appStyle.disabledArrowColor
+         },
+@@ -48,20 +48,20 @@ export default function (theme = {}) {
+             marginTop: 7,
+             flexDirection: 'row',
+             justifyContent: 'space-around',
+-            paddingHorizontal: 15
+         },
+         partialWeek: {
+             paddingRight: 0
+         },
+         dayHeader: {
++            flex: 1,
+             marginTop: 2,
+             marginBottom: 7,
+             width: 32,
+             textAlign: 'center',
+-            fontSize: appStyle.textDayHeaderFontSize,
+-            fontFamily: appStyle.textDayHeaderFontFamily,
++            fontSize: 14,
++            fontFamily: 'Raleway-Bold',
+             fontWeight: appStyle.textDayHeaderFontWeight,
+-            color: appStyle.textSectionTitleColor
++            color: appStyle.textSectionTitleColor,
+         },
+         disabledDayHeader: {
+             color: appStyle.textSectionTitleDisabledColor
+diff --git a/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_left.png b/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_left.png
+new file mode 100644
+index 0000000..b656c45
+Binary files /dev/null and b/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_left.png differ
+diff --git a/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_right.png b/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_right.png
+new file mode 100644
+index 0000000..f47a345
+Binary files /dev/null and b/node_modules/react-native-calendars/src/calendar/img/ic_calendar_arrow_right.png differ
+diff --git a/node_modules/react-native-calendars/src/commons/WeekDaysNames.js b/node_modules/react-native-calendars/src/commons/WeekDaysNames.js
+index f57b436..a8fc488 100644
+--- a/node_modules/react-native-calendars/src/commons/WeekDaysNames.js
++++ b/node_modules/react-native-calendars/src/commons/WeekDaysNames.js
+@@ -2,9 +2,9 @@ import React from 'react';
+ import { Text } from 'react-native';
+ import { weekDayNames } from '../dateutils';
+ const WeekDaysNames = React.memo(({ firstDay, style }) => {
+-    const dayNames = weekDayNames(firstDay);
+-    return dayNames.map((day, index) => (<Text allowFontScaling={false} key={index} style={style} numberOfLines={1} accessibilityLabel={''}>
+-      {day}
+-    </Text>));
++  const dayNames = weekDayNames(firstDay);
++  return dayNames.map((day, index) => (<Text allowFontScaling={false} key={index} style={style} numberOfLines={1} accessibilityLabel={''}>
++    {day}
++  </Text>));
+ });
+ export default WeekDaysNames;
+diff --git a/node_modules/react-native-calendars/src/img/ic_calendar_arrow_letf.png b/node_modules/react-native-calendars/src/img/ic_calendar_arrow_letf.png
+new file mode 100644
+index 0000000..b656c45
+Binary files /dev/null and b/node_modules/react-native-calendars/src/img/ic_calendar_arrow_letf.png differ
+diff --git a/node_modules/react-native-calendars/src/img/ic_calendar_arrow_right.png b/node_modules/react-native-calendars/src/img/ic_calendar_arrow_right.png
+new file mode 100644
+index 0000000..f47a345
+Binary files /dev/null and b/node_modules/react-native-calendars/src/img/ic_calendar_arrow_right.png differ

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "959978304335",
+    "project_id": "budify-1b10e",
+    "storage_bucket": "budify-1b10e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959978304335:android:871fbb7aae22070aba0b3a",
+        "android_client_info": {
+          "package_name": "com.reactnativebudify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "959978304335-eoe9ug60p5bh77j8v5tchgbdjd9dvh3h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reactnativebudify",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "959978304335-p927la16clm97b245jljusd9p0l1a4en.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7EdD-qaEtQwtBjK_QigokkAJFZmNfwXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "959978304335-p927la16clm97b245jljusd9p0l1a4en.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "959978304335-giof327pfgovbcfa6c40v96vgl0cafjt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.ReactNativeBudify"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>959978304335-l7r8ic2qjgnfim9lf5prnpe5498r37fc.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.959978304335-l7r8ic2qjgnfim9lf5prnpe5498r37fc</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>959978304335-0bokesllrafhnbqls1s3eosmr2bc0agh.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCCIsvppKnOv-cvfysFlCWwvyM6OPrvAg8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>959978304335</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.ReactNativeBudify</string>
+	<key>PROJECT_ID</key>
+	<string>budify-1b10e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>budify-1b10e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:959978304335:ios:dc9a0e13196b3d63ba0b3a</string>
+</dict>
+</plist>

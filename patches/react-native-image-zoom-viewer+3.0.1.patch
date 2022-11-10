@@ -1,0 +1,53 @@
+diff --git a/node_modules/react-native-image-zoom-viewer/.DS_Store b/node_modules/react-native-image-zoom-viewer/.DS_Store
+new file mode 100644
+index 0000000..7b4d7cc
+Binary files /dev/null and b/node_modules/react-native-image-zoom-viewer/.DS_Store differ
+diff --git a/node_modules/react-native-image-zoom-viewer/built/image-viewer.style.js b/node_modules/react-native-image-zoom-viewer/built/image-viewer.style.js
+index c6efc53..7639485 100644
+--- a/node_modules/react-native-image-zoom-viewer/built/image-viewer.style.js
++++ b/node_modules/react-native-image-zoom-viewer/built/image-viewer.style.js
+@@ -2,7 +2,7 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.default = (function (width, height, backgroundColor) {
+     return {
+-        modalContainer: { backgroundColor: backgroundColor, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
++        modalContainer: { backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+         watchOrigin: { position: 'absolute', width: width, bottom: 20, justifyContent: 'center', alignItems: 'center' },
+         watchOriginTouchable: {
+             paddingLeft: 10,
+@@ -12,11 +12,11 @@ exports.default = (function (width, height, backgroundColor) {
+             borderRadius: 30,
+             borderColor: 'white',
+             borderWidth: 0.5,
+-            backgroundColor: 'rgba(0, 0, 0, 0.1)'
++            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+         },
+         watchOriginText: { color: 'white', backgroundColor: 'transparent' },
+         imageStyle: {},
+-        container: { backgroundColor: backgroundColor },
++        container: { backgroundColor: 'transparent' },
+         moveBox: { flexDirection: 'row', alignItems: 'center' },
+         menuContainer: { position: 'absolute', width: width, height: height, left: 0, bottom: 0, zIndex: 12 },
+         menuShadow: {
+@@ -50,7 +50,7 @@ exports.simpleStyle = {
+         position: 'absolute',
+         left: 0,
+         right: 0,
+-        top: 38,
++        bottom: 100,
+         zIndex: 13,
+         justifyContent: 'center',
+         alignItems: 'center',
+@@ -58,9 +58,10 @@ exports.simpleStyle = {
+     },
+     countText: {
+         color: 'white',
+-        fontSize: 16,
++        fontSize: 15,
++        fontFamily: 'Raleway-Medium',
+         backgroundColor: 'transparent',
+-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
++        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+         textShadowOffset: {
+             width: 0,
+             height: 0.5

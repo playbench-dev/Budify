@@ -1,0 +1,30 @@
+diff --git a/node_modules/react-native/.DS_Store b/node_modules/react-native/.DS_Store
+new file mode 100644
+index 0000000..23e39b5
+Binary files /dev/null and b/node_modules/react-native/.DS_Store differ
+diff --git a/node_modules/react-native/Libraries/Image/RCTAnimatedImage.m b/node_modules/react-native/Libraries/Image/RCTAnimatedImage.m
+index 978fc2e..1ec203c 100644
+--- a/node_modules/react-native/Libraries/Image/RCTAnimatedImage.m
++++ b/node_modules/react-native/Libraries/Image/RCTAnimatedImage.m
+@@ -88,8 +88,12 @@
+     if (gifLoopCount != nil) {
+       loopCount = gifLoopCount.unsignedIntegerValue;
+       // A loop count of 1 means it should repeat twice, 2 means, thrice, etc.
+-      if (loopCount != 0) {
+-        loopCount++;
++      if(@available(iOS 14, *)) {
++      
++      } else { 
++        if (loopCount != 0) {
++          loopCount++;
++        }
+       }
+     }
+   }
+diff --git a/node_modules/react-native/scripts/.packager.env b/node_modules/react-native/scripts/.packager.env
+new file mode 100644
+index 0000000..361f5fb
+--- /dev/null
++++ b/node_modules/react-native/scripts/.packager.env
+@@ -0,0 +1 @@
++export RCT_METRO_PORT=8081
