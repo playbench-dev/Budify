@@ -40,25 +40,25 @@ export default class SavedSearch extends React.Component {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         }, ...User.category],
         placeCategoryList: [{
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         }, ...User.contentsCategory],
         exCategoryNum: {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         },
         placeCategoryNum: {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         },
         lang: (I18n.currentLocale() == 'en-US' ? 'en' : I18n.currentLocale() == 'ko-KR' ? 'ko' : I18n.currentLocale() == 'ja-JP' ? 'ja' : 'en'),
         selectedDate: [],
@@ -339,13 +339,12 @@ export default class SavedSearch extends React.Component {
         const json = await NetworkCall.Select(url, formBody)
         console.log('_InsertSaved', json)
         if (json.length > 0) {
-            Toast.show({ text1: I18n.t('savedToast') });
             if (flag == 1) {
+                Toast.show({ text1: I18n.t('savedToast') });
                 User.exSaved.push(no)
-                this._SelectExSaved()
             } else {
+                Toast.show({ text1: I18n.t('savedContentsToast') });
                 User.placeSaved.push(no)
-                this._SelectPlaceSaved()
             }
         }
     }
@@ -405,7 +404,7 @@ export default class SavedSearch extends React.Component {
                         <TouchableOpacity onPress={() => this.setState({ tabType: 2 })}>
                             <View style={{ justifyContent: 'flex-end' }}>
                                 <View style={{ paddingLeft: 18, paddingRight: 18, marginBottom: 8 }}>
-                                    <Text style={{ color: this.state.tabType == 2 ? Colors.color2D7DC8 : Colors.color5B5B5B, fontFamily: 'Raleway-Bold', fontSize: 15, includeFontPadding: false }}>{I18n.t('contentsTabPlaces')}</Text>
+                                    <Text style={{ color: this.state.tabType == 2 ? Colors.color2D7DC8 : Colors.color5B5B5B, fontFamily: 'Raleway-Bold', fontSize: 15, includeFontPadding: false }}>{I18n.t('contents')}</Text>
                                 </View>
                                 <View style={{ height: 4, backgroundColor: Colors.color2D7DC8, opacity: this.state.tabType == 2 ? 1 : 0 }}></View>
                             </View>
@@ -434,7 +433,8 @@ export default class SavedSearch extends React.Component {
                                                                 <View style={{ width: 8, height: 8, backgroundColor: Colors.colorFFFFFF, marginLeft: 2 }}></View>
                                                             </View>
                                                         </View>
-                                                    ) : <Image source={imgCategory} style={{ width: 60, height: 60, resizeMode: 'contain', }}></Image>}
+                                                    ) : <FastImage style={{ width: 60, height: 60, borderRadius: 30 }} source={{ uri: ServerUrl.Server + item.image_path, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal, }} resizeMode={FastImage.resizeMode.cover}></FastImage>}
+
                                                 </View>
                                             </View>
 
@@ -557,7 +557,7 @@ export default class SavedSearch extends React.Component {
                 selectDialogVisible: false,
                 showSelectedScheduleDate: this.state._markedDates[0] + ' ~ ' + this.state._markedDates[this.state._markedDates.length - 1],
                 isFetching: true,
-            }, () => this.props.navigation.navigate('SavedScheduleMain', { country: this.props.route.params.select.country_no, city: this.props.route.params.select.city_no == 0 ? -1 : this.props.route.params.select.city_no, marked: this.state.marked, _markedDates: this.state._markedDates, select: this.props.route.params.select }));
+            }, () => this.props.navigation.navigate('SavedScheduleMain', { country: this.props.route.params.select.country_no, city: this.props.route.params.select.city_no == 0 ? -1 : this.props.route.params.select.city_no, marked: this.state.marked, _markedDates: this.state._markedDates, select: this.props.route.params.select, position: 'Search' }));
         } else if (value.type == '5') {
             this.setState({
                 selectDialogVisible: false,

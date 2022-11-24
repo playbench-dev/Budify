@@ -94,14 +94,14 @@ export default class Main extends React.Component {
                     options={{
 
                         tabBarIcon: ({ color, focused }) => (
-                            <Image source={imgExperienceIcon} style={{ width: 20, height: 14, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
+                            <Image source={imgExperienceIcon} style={{ width: 21, height: 21, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
                         )
                     }} />
                 <Tab.Screen name={I18n.t('contents')} component={ContentsTabs}
                     // initialParams={{ country: this.state.country, city: this.state.city, region: this.state.region, categories: this.state.categories, }} 
                     options={{
                         tabBarIcon: ({ color, focused }) => (
-                            <Image source={imgContentsIcon} style={{ width: 21, height: 15, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
+                            <Image source={imgContentsIcon} style={{ width: 16, height: 21, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
                         )
                     }} />
                 <Tab.Screen name="Home" component={HomeTabs} listeners={{
@@ -113,14 +113,30 @@ export default class Main extends React.Component {
                         <Image source={focused == true ? this.state.focusOutHomeGif : icHomeLightEnd} style={{ width: 88, height: 88 }} resizeMode={"cover"} ></Image>
                     )
                 }} />
-                <Tab.Screen name={I18n.t('saved')} component={SavedTabs} options={{
+                <Tab.Screen name={I18n.t('saved')} component={SavedTabs} listeners={{
+                    tabPress: e => {
+                        console.log(e)
+                        if (User.guest == true) {
+                            this.props.navigation.navigate('GuestLogin')
+                            e.preventDefault();
+                        }
+                    }
+                }} options={{
                     tabBarIcon: ({ color, focused }) => (
-                        <Image source={imgSavedIcon} style={{ width: 13, height: 17, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
+                        <Image source={imgSavedIcon} style={{ width: 24, height: 24, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
                     )
                 }} />
-                <Tab.Screen name={I18n.t('profile')} component={User.level == 99 ? ManagerTabs : ProfileTabs} options={{
+                <Tab.Screen name={I18n.t('profile')} component={User.level == 99 ? ManagerTabs : ProfileTabs} listeners={{
+                    tabPress: e => {
+                        console.log(e)
+                        if (User.guest == true) {
+                            this.props.navigation.navigate('GuestLogin')
+                            e.preventDefault();
+                        }
+                    }
+                }} options={{
                     tabBarIcon: ({ color, focused }) => (
-                        <Image source={imgProfileIcon} style={{ width: 19, height: 19, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
+                        <Image source={imgProfileIcon} style={{ width: 24, height: 24, tintColor: (focused == true ? Colors.color2D7DC8 : Colors.color808080), resizeMode: 'contain' }} />
                     )
                 }} />
             </Tab.Navigator>

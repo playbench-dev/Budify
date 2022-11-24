@@ -9,8 +9,11 @@ import BasicDialog from '../../Common/BasicDialog'
 import ServerUrl from '../../Common/ServerUrl';
 import * as NetworkCall from '../../Common/NetworkCall'
 import FetchingIndicator from 'react-native-fetching-indicator'
+import MultipleImagePicker from '@baronha/react-native-multiple-image-picker';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const TAG = 'HostExperiencesInsert04';
+
 const imgBack = require('../../../assets/ic_back.png');
 const imgDownArrow = require('../../../assets/ic_down_arrow.png');
 const imgLocation = require('../../../assets/ic_location.png');
@@ -286,12 +289,60 @@ export default class HostExperiencesInsert04 extends React.Component {
             json => {
                 console.log(TAG, json);
                 if (json.affectedRows == 1) {
-                    this.setState({ isFetching: false })
-                    this.props.navigation.reset({ index: 1, routes: [{ name: 'Main', params: { screen: I18n.t('profile') } }, { name: 'HostExperiencesManage' }] })
+                    if (User.level == 1) {
+                        this._NetworkUpdate()
+                    } else {
+                        this.setState({ isFetching: false })
+                        this.props.navigation.reset({ index: 1, routes: [{ name: 'Main', params: { screen: I18n.t('profile') } }, { name: 'HostExperiencesManage' }] })
+                    }
                 } else {
                     this.setState({ isFetching: false })
                 }
             })
+    }
+
+    async _NetworkUpdate() {
+        console.log('asdasdsad1111')
+        var url = "";
+        var formBody = '';
+
+        formBody = JSON.stringify({
+            "user_no": User.userNo,
+            "level": 2,
+        });
+
+        url = ServerUrl.UpdateUserUrl
+
+        const json = await NetworkCall.Select(url, formBody)
+        console.log('aaaaa', json)
+
+        if (json.length > 0) {
+            AsyncStorage.setItem('userInfo', JSON.stringify({
+                'user_no': json[0].user_no || '', 'profileUrl': json[0].avatar_url || '', 'password': json[0].password || '',
+                'nickname': json[0].nickname || '', 'userName': json[0].name || '', 'email': json[0].email || '',
+                'birth': json[0].birth || '', 'gender': json[0].gender || '', 'phone': json[0].phone || '',
+                'auth_provider': json[0].auth_provider || '', 'token': json[0].token || '', 'nationality': json[0].nationality, 'bio': json[0].bio,
+                'bank': json[0].bank, 'account_holder': json[0].account_holder, 'account_number': json[0].account_number,
+            }));
+            console.log('asdasdsad22')
+            User.userNo = json[0].user_no
+            User.profileUrl = json[0].avatar_url
+            User.nickname = json[0].nickname
+            User.userName = json[0].name
+            User.email = json[0].email
+            User.birth = json[0].birth
+            User.gender = json[0].gender
+            User.phone = json[0].phone
+            User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
+            User.level = json[0].level
+
+            console.log('asdasdsad')
+            this.setState({ isFetching: false })
+            this.props.navigation.reset({ index: 1, routes: [{ name: 'Main', params: { screen: I18n.t('profile') } }, { name: 'HostExperiencesManage' }] })
+        } else {
+            this.setState({ isFetching: false })
+            this.props.navigation.reset({ index: 1, routes: [{ name: 'Main', params: { screen: I18n.t('profile') } }, { name: 'HostExperiencesManage' }] })
+        }
     }
 
     render() {

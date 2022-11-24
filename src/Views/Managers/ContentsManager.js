@@ -259,6 +259,11 @@ export default class ContentsManager extends React.Component {
                 "q": "order",
                 "f": "e_dt",
                 "o": "DESC"
+            }, {
+                "op": "AND",
+                "q": "=",
+                "f": "status",
+                "v": 1
             },]
         if (this.state._markedDates.length > 0) {
             if (timeSelected.length > 0) {
@@ -349,6 +354,7 @@ export default class ContentsManager extends React.Component {
         console.log(TAG, json)
         for (let i = 0; i < json.list.length; i++) {
             console.log(JSON.parse(json.list[i].image_representative).length)
+            console.log(json.list[i].place_no == 75 && JSON.parse(json.list[i].place_name).default)
             const obj = {
                 placeNo: json.list[i].place_no,
                 repPath: JSON.parse(json.list[i].image_representative),
@@ -460,7 +466,7 @@ export default class ContentsManager extends React.Component {
                                 </View>
 
                                 <View style={{ marginTop: 12, backgroundColor: Colors.colorFFFFFF, borderWidth: 1, borderColor: Colors.colorBFBFBF, borderRadius: 4, height: 40, flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 10 }}>
-                                    <TextInput style={{ flex: 1, fontSize: 12, color: Colors.color000000, fontFamily: "Raleway-Medium", includeFontPadding: false, marginLeft: 0, padding: 0 }} ellipsizeMode="tail" placeholder={I18n.t('savedSearch')} placeholderTextColor={Colors.colorB7B7B7}></TextInput>
+                                    <TextInput style={{ flex: 1, fontSize: 12, color: Colors.color000000, fontFamily: "Raleway-Medium", includeFontPadding: false, marginLeft: 0, padding: 0 }} ellipsizeMode="tail" placeholder={I18n.t('savedSearch')} placeholderTextColor={Colors.colorB7B7B7} onChangeText={(text) => this.state.searchText = text} onSubmitEditing={() => this._ContentsPlace()}></TextInput>
                                     <Image source={imgSearch} style={{ width: 15, height: 15, resizeMode: 'contain', marginRight: 8 }}></Image>
                                 </View>
                             </View>
@@ -491,7 +497,7 @@ export default class ContentsManager extends React.Component {
                                 <View style={{ flexDirection: 'row', paddingLeft: 16, paddingRight: 16, marginTop: 20, alignItems: 'center' }}>
                                     <FastImage style={{ width: 80, height: 80, resizeMode: 'cover', borderRadius: 40 }} source={{ uri: ServerUrl.Server + obj.item.repPath, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
                                     <View style={{ marginLeft: 15, flex: 1 }}>
-                                        <Text style={{ color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, fontSize: 16 }}>{Utils.GrinderContents(obj.item.placeName)}</Text>
+                                        <Text style={{ color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, fontSize: 16 }}>{Utils.GrinderContents(obj.item.placeName).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')}</Text>
                                         <Text style={{ color: Colors.color5B5B5B, fontFamily: 'Raleway-Medium', includeFontPadding: false, fontSize: 12, marginTop: 4 }}>{Utils.Grinder(User.contentsCategory.filter((el) => el.category_no == obj.item.category[0])[0]) + "・" + Utils.Grinder(obj.item.regionNo != -1 ? User.region.filter((el) => el.town_no == obj.item.regionNo)[0] : obj.item.cityNo != -1 ? User.city.filter((el) => el.city_no == obj.item.cityNo)[0] : User.country.filter((el) => el.country_no == obj.item.countryNo)[0])}</Text>
                                         <View style={{ flexDirection: 'row', marginTop: 9 }}>
                                             <TouchableOpacity onPress={() => this.props.navigation.navigate('ContentsEdit', { parentFunction: this.parentFunction, placeNo: obj.item.placeNo })}>

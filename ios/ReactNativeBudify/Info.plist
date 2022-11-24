@@ -33,7 +33,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>kakaoaaaaaaaaaaaaaaaaa</string>
+				<string>kakao273341293a4bdf5c1eeaaaa33b0ffd7f</string>
 			</array>
 		</dict>
 		<dict>
@@ -64,9 +64,12 @@
 	<key>FacebookDisplayName</key>
 	<string>Budify</string>
 	<key>KAKAO_APP_KEY</key>
-	<string>aaaaaaaaaaaaaaaaa</string>
+	<string>273341293a4bdf5c1eeaaaa33b0ffd7f</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>instagram-stories</string>
+		<string>snapchat</string>
+		<string>instagram</string>
 		<string>kakaokompassauth</string>
 		<string>kakaolink</string>
 		<string>whatsapp</string>

@@ -86,9 +86,19 @@ export default class ServerUrl {
     static SelectSavedEx = ServerUrl.Server + 'mSaved/SelectSaved';
     static DeleteSavedEx = ServerUrl.Server + 'mSaved/DeleteSaved';
 
+    //Travel
+    static InsertTravel = ServerUrl.Server + 'mTravel/InsertTravel';
+    static SelectTravel = ServerUrl.Server + 'mTravel/SelectTravel';
+    static UpdateTravel = ServerUrl.Server + 'mTravel/UpdateTravel';
+    static DeleteTravel = ServerUrl.Server + 'mTravel/DeleteTravel';
+
     //Inquiry
     static InsertInquiry = ServerUrl.Server + 'mInquiry/InsertInquiry'
     static SelectInquiry = ServerUrl.Server + 'mInquiry/SelectInquiry'
     static UpdateInquiry = ServerUrl.Server + 'mInquiry/UpdateInquiry'
     static DeleteInquiry = ServerUrl.Server + 'mInquiry/DeleteInquiry'
+
+    //Profile
+    static SelectRecentOrder = ServerUrl.Server + 'mOrder/SelectRecentOrder'
+    static SelectReviewBySellerUserNo = ServerUrl.Server + 'mReview/SelectReviewBySellerUserNo'
 }

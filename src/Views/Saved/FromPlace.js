@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Image, TouchableWithoutFeedback, Text, ScrollView, TextInput, Modal, FlatList, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView, View, Image, TouchableWithoutFeedback, Text, ScrollView, TextInput, Modal, FlatList, ImageBackground, TouchableOpacity, Dimensions, BackHandler } from 'react-native';
 import I18n from '../../lang/i18n';
 import Colors from '../../Common/Colos';
 import * as Utils from '../../Common/Utils'
@@ -27,11 +27,23 @@ const { width: screenWidth } = Dimensions.get('window');
 export default class FromPlace extends React.Component {
     constructor(props) {
         super(props)
+        this.backAction = this.backAction.bind(this);
     }
 
     componentDidMount() {
+        BackHandler.addEventListener("hardwareBackPress", this.backAction);
         this._SelectPlaceSaved()
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+    }
+
+    backAction() {
+        this.props.route.params.parentFuntion(null, -1, 11)
+        this.props.navigation.goBack()
+        return true;
+    };
 
     state = {
         specialExperienceDatas: [],
@@ -42,25 +54,25 @@ export default class FromPlace extends React.Component {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         }, ...User.category],
         placeCategoryList: [{
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         }, ...User.contentsCategory],
         exCategoryNum: {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         },
         placeCategoryNum: {
             category_no: 0,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国'
         },
         lang: (I18n.currentLocale() == 'en-US' ? 'en' : I18n.currentLocale() == 'ko-KR' ? 'ko' : I18n.currentLocale() == 'ja-JP' ? 'ja' : 'en'),
         selectedDate: [],
@@ -272,7 +284,7 @@ export default class FromPlace extends React.Component {
                                                                 <View style={{ width: 8, height: 8, backgroundColor: Colors.colorFFFFFF, marginLeft: 2 }}></View>
                                                             </View>
                                                         </View>
-                                                    ) : <Image source={imgCategory} style={{ width: 60, height: 60, resizeMode: 'contain', }}></Image>}
+                                                    ) : <FastImage style={{ width: 60, height: 60, borderRadius: 30 }} source={{ uri: ServerUrl.Server + item.image_path, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal, }} resizeMode={FastImage.resizeMode.cover}></FastImage>}
                                                 </View>
                                             </View>
 

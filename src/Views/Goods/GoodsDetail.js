@@ -1,5 +1,5 @@
 import React from 'react'
-import { SafeAreaView, View, Text, Image, FlatList, ScrollView, TouchableWithoutFeedback, Dimensions, ImageBackground, Modal, TextInput, TouchableOpacity, Animated, Linking, } from 'react-native'
+import { SafeAreaView, View, Text, Image, FlatList, ScrollView, TouchableWithoutFeedback, Dimensions, ImageBackground, Modal, TextInput, TouchableOpacity, Animated, Linking, Share, Platform } from 'react-native'
 import Colors from '../../Common/Colos'
 import I18n from '../../lang/i18n';
 import * as Utils from '../../Common/Utils'
@@ -18,7 +18,12 @@ import FetchingIndicator from 'react-native-fetching-indicator'
 import Geocoder from 'react-native-geocoding';
 import Moment from 'moment';
 import RNFetchBlob from 'rn-fetch-blob'
-import Share from 'react-native-share'
+import ShareLib from 'react-native-share'
+import { firebase } from '@react-native-firebase/dynamic-links';
+import KakaoShareLink from 'react-native-kakao-share-link';
+import RNStoryShare from "react-native-story-share";
+import ViewShot, { captureScreen, captureRef } from "react-native-view-shot";
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const TAG = "GoodsDetail"
 const imgBack = require('../../../assets/ic_close_white.png');
@@ -30,9 +35,12 @@ const imgStarOff = require('../../../assets/ic_star_off.png');
 const imgCircleSaveBg = require('../../../assets/ic_circle_saved.png');
 const imgLinkBg = require('../../../assets/ic_link_bg.png');
 const imgInstargramBg = require('../../../assets/ic_link_instagram_bg.png');
+const imgInstargram = require('../../../assets/ic_instagram.png');
 const imgLinkKakao = require('../../../assets/ic_link_kakao.png');
 const imgLinkMore = require('../../../assets/ic_link_more.png');
 const imgLink = require('../../../assets/ic_link.png');
+const imgWhatapp = require('../../../assets/ic_whatapp.png');
+const imgLine = require('../../../assets/ic_line.png');
 const imgAccount = require('../../../assets/account_circle.png')
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -40,6 +48,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 export default class GoodsDetail extends React.Component {
     constructor(props) {
         super(props)
+        this.captureView = React.createRef()
     }
 
     componentDidMount() {
@@ -92,6 +101,7 @@ export default class GoodsDetail extends React.Component {
         minutes: '',
         languages: '',
         representativeFileUrl: [],
+        repPath: '',
         rate: 0,
         reviewCnt: 0,
         orderCnt: 0,
@@ -197,7 +207,7 @@ export default class GoodsDetail extends React.Component {
                             </View>
                         </TouchableWithoutFeedback>
 
-                        {this.state.specialExperienceDatas.length != ((i * 2) + 1) && <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('PlaceDetail', { placeNo: this.state.specialPlaceDatas[(i * 2) + 1].place_no })}>
+                        {this.state.specialPlaceDatas.length != ((i * 2) + 1) && <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('PlaceDetail', { placeNo: this.state.specialPlaceDatas[(i * 2) + 1].place_no })}>
                             <View style={{ width: (screenWidth - 46) / 2, borderRadius: 4, marginLeft: 14, }}>
                                 <FastImage style={{ width: '100%', height: ((screenWidth - 46) / 2) * 1.3953, borderRadius: 4 }} source={{ uri: this.state.specialPlaceDatas[(i * 2) + 1].representative_file_url, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
                                 <TouchableOpacity style={{ position: 'absolute', top: 8, right: 7, alignItems: 'center', justifyContent: 'center' }} onPress={() => this._Bookmark(2, this.state.specialPlaceDatas[(i * 2) + 1].place_no)}>
@@ -229,18 +239,21 @@ export default class GoodsDetail extends React.Component {
     }
 
     _Bookmark = (flag, no) => {
-        if (flag == 1) {
-            if (User.exSaved.includes(no)) {
-                this._DelectSaved(flag, no)
-            } else {
-                this._SelectSaved(flag, no)
-            }
-            console.log(User.exSaved)
+        if (User.guest == true) {
+            this.props.navigation.navigate('GuestLogin')
         } else {
-            if (User.placeSaved.includes(no)) {
-                this._DelectSaved(flag, no)
+            if (flag == 1) {
+                if (User.exSaved.includes(no)) {
+                    this._DelectSaved(flag, no)
+                } else {
+                    this._SelectSaved(flag, no)
+                }
             } else {
-                this._SelectSaved(flag, no)
+                if (User.placeSaved.includes(no)) {
+                    this._DelectSaved(flag, no)
+                } else {
+                    this._SelectSaved(flag, no)
+                }
             }
         }
     }
@@ -305,7 +318,7 @@ export default class GoodsDetail extends React.Component {
                 <View>
                     <TouchableWithoutFeedback onPress={() => this.setState({ imgMagnify: false })}>
                         <View style={{ height: '100%', width: '100%', justifyContent: "center", alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)', }}>
-                            <ImageViewer style={{ width: '100%', height: '100%' }} imageUrls={this.state.imagesUrl} onChange={(index) => console.log('_ImageMagnify', index)} saveToLocalByLongPress={false} enableSwipeDown={true} onSwipeDown={() => this.setState({ imgMagnify: false })}></ImageViewer>
+                            <ImageViewer style={{ width: '100%', height: '100%' }} imageUrls={this.state.imagesUrl} saveToLocalByLongPress={false} enableSwipeDown={true} onSwipeDown={() => this.setState({ imgMagnify: false })}></ImageViewer>
                             <TouchableOpacity onPress={() => this.setState({ imgMagnify: false })} style={{ position: 'absolute', top: 0, width: '100%', height: (screenHeight - screenWidth) / 2.5 }}>
                                 <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 14 }}>
                                     {/* <Image source={imgBack} style={{ width: 12, height: 12, resizeMode: 'contain' }}></Image> */}
@@ -324,108 +337,71 @@ export default class GoodsDetail extends React.Component {
         )
     }
 
-    onShare = async () => {
-        try {
-            const result = await Share.shareSingle(
-                {
-                    message: '공유에 보이는 메세지 이거를 복붙할 수도 있엉!',
-                    social: Share.Social.WHATSAPP,
-                    url: 'data:image/jpeg;base64,'
-                }
-            );
+    async DynamicLink(params, value, type) {
+        console.log(ServerUrl.Server + this.state.repPath)
+        const link = await firebase.dynamicLinks().buildShortLink({
+            link: `https://www.budify.io/${params}/${value}`,
+            // domainUriPrefix is created in your Firebase console
 
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
-                    console.log('activityType!');
-                } else {
-                    console.log('Share!');
-                }
-            } else if (result.action === Share.dismissedAction) {
-                console.log('dismissed');
+            // optional setup which updates Firebase analytics campaign
+            // "banner". This also needs setting up before hand
+            ios: {
+                bundleId: 'org.ReactNativeBudify'
+            },
+            android: {
+                packageName: 'com.reactnativebudify'
+            },
+            domainUriPrefix: 'https://reactnativebudify.page.link',
+            social: {
+                title: this.state.title,
+                descriptionText: this.state.description,
+                imageUrl: ServerUrl.Server + this.state.repPath
             }
-        } catch (error) {
-            alert(error.message);
-        }
-    };
-
-    shareImage() {
-        // .then((res) => { console.log(res) })
-        // .catch((err) => { err && console.log(err); });
-        let shareOptions = {
-            title: 'Title',
-            url: 'https://www.budify.io/Experiences/107',
-            type: '/image',
-            message: 'Budify에서 이 경험을 확인해보세요!',
-            subject: 'Subject',
-            social: Share.Social.WHATSAPP,
-        };
-        Share.shareSingle(shareOptions)
-        // Linking.openURL('whatsapp://send?text=' + 'budify.io/Experiences/82' + '&image=' + 'https://budify.info/images/ex/36/images/2022090901005720220831104450ScreenShot2022-08-28at3.29.35PM.png')
-        // RNFetchBlob.fetch('GET', 'https://budify.info/images/ex/36/images/2022090901005720220831104450ScreenShot2022-08-28at3.29.35PM.png')
-        //     .then(resp => {
-        //         let base64image = resp.data;
-        //         // share('data:image/png;base64,' + base64image);
-
-        //     })
-        //     .catch(err => errorHandler(err));
-        // share = base64image => {
-        //     let shareOptions = {
-        //         title: 'Title',
-        //         url: base64image,
-        //         message: 'https://www.budify.io/Experiences/107',
-        //         subject: 'Subject',
-        //         social: Share.Social.WHATSAPP,
-        //     };
-        //     Share.shareSingle(shareOptions)
-        //     // .then((res) => { console.log(res) })
-        //     // .catch((err) => { err && console.log(err); });
-
-        //     // Share.shareSingle(shareOptions)
-        //     //     .then(res => {
-        //     //         console.log(res);
-        //     //     })
-        //     //     .catch(err => {
-        //     //         err && console.log(err);
-        //     //     });
-        // };
-
-    };
-
-    shareTheProductDetails(imagesPath) {
-        // let {productDetails} = this.state;
-        let imagePath = null;
-        RNFetchBlob.config({
-            fileCache: true,
-        })
-            .fetch('GET', 'https://t1.daumcdn.net/cfile/tistory/25257E4753D84EE013')
-            // the image is now dowloaded to device's storage
-            .then((resp) => {
-                // the image path you can use it directly with Image component
-                imagePath = resp.path();
-                return resp.readFile('base64');
-            })
-            .then((base64Data) => {
-                // here's base64 encoded image
-                var imageUrl = 'data:image/png;base64,' + base64Data;
-                let shareImage = {
-                    title: 'title', //string
-                    message:
-                        'Description ' +
-                        ' http://beparr.com/', //string
-                    url: imageUrl,
-                    social: Share.Social.WHATSAPP
-                    // urls: [imageUrl, imageUrl], // eg.'http://img.gemejo.com/product/8c/099/cf53b3a6008136ef0882197d5f5.jpg',
-                };
-                Share.shareSingle(shareImage)
-                    .then((res) => {
-                        console.log('aaaaa : ', res);
-                    })
-                    .catch((err) => {
-                        err && console.log(err);
-                    });
-                // remove the file from storage
-                return fs.unlink(imagePath);
-            });
+        }).then((shortLink) => {
+            if (type == 1) {
+                this.setState({ sharedDialogVisible: false, }, () => {
+                    Toast.show({ text1: 'Copied.' });
+                    Clipboard.setString(shortLink)
+                })
+            } else if (type == 2) {
+                Linking.openURL('whatsapp://send?text=' + shortLink)
+            } else if (type == 3) {
+                this.setState({ sharedDialogVisible: false, }, () => this.props.navigation.navigate('InstagramShared', { link: shortLink, repPath: this.state.repPath, title: this.state.title, contents: this.state.description, category: Utils.Grinder(this.state.categories[0]), city: Utils.Grinder(User.region.filter((el) => el.town_no == this.state.town)[0]) }))
+            } else if (type == 4) {
+                KakaoShareLink.sendFeed({
+                    content: {
+                        title: this.state.title,
+                        description: this.state.description,
+                        imageHeight: 120,
+                        imageUrl: ServerUrl.Server + this.state.repPath,
+                        link: {
+                            webUrl: `https://www.budify.io/${params}/${value}`,
+                            mobileWebUrl: shortLink,
+                        },
+                    },
+                    buttons: [
+                        {
+                            title: '앱에서 보기',
+                            link: {
+                                androidExecutionParams: [{ key: params, value: '' + value }],
+                                iosExecutionParams: [{ key: params, value: '' + value }],
+                            },
+                        },
+                    ],
+                });
+            } else if (type == 5) {
+                Linking.openURL('http://line.me/R/msg/text/?' + shortLink)
+            } else if (type == 6) {
+                Share.share({
+                    title: shortLink,
+                    url: shortLink
+                })
+                // ShareLib.open({
+                //     title: shortLink,
+                //     url: shortLink
+                // })
+            }
+        });
     }
 
     _SharedDialog() {
@@ -439,50 +415,55 @@ export default class GoodsDetail extends React.Component {
                                 <View style={{ marginTop: 12, height: 1, backgroundColor: Colors.colorBFBFBF }}></View>
 
                                 <View style={{ marginTop: 20 }}>
-                                    <TouchableWithoutFeedback >
+                                    <TouchableOpacity style={{}} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 1)}>
                                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.color569BEF }}>
                                                 <Image source={imgLink} style={{ width: 17, height: 9 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareCopyLink')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback onPress={() => Linking.openURL('kakaoTalk://')}>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 2)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <Image style={{ width: 32, height: 32, resizeMode: 'contain' }} source={imgWhatapp}></Image>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnWhatsApp')}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 3)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <ImageBackground source={imgInstargramBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ width: 20, height: 16, resizeMode: 'contain' }} source={imgInstargram}></Image>
+                                            </ImageBackground>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnInstagram')}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 4)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
                                                 <Image source={imgLinkKakao} style={{ width: 20, height: 16 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnKakao')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                                            <ImageBackground source={imgInstargramBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
-                                                <Image style={{ width: 20, height: 16 }}></Image>
-                                            </ImageBackground>
-                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnInstagram')}</Text>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 5)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <Image style={{ width: 32, height: 32, resizeMode: 'contain' }} source={imgLine}></Image>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnLine')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback onPress={() => this.shareImage()}>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                                            <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.color569BEF }}>
-                                                <Image style={{ width: 17, height: 9 }}></Image>
-                                            </ImageBackground>
-                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnWhatsApp')}</Text>
-                                        </View>
-                                    </TouchableWithoutFeedback>
-
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Experiences', this.state.exNo, 6)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.colorD9D9D9 }}>
                                                 <Image source={imgLinkMore} style={{ width: 13, height: 3 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareMore')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -490,6 +471,19 @@ export default class GoodsDetail extends React.Component {
                 </TouchableWithoutFeedback>
             </Modal >
         )
+    }
+
+    _OpenGps = (lat, lng) => {
+        // var scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
+        // var url = scheme + `${lat},${lng}`;
+        // Linking.openURL(url);
+
+        const url = Platform.select({
+            ios: `maps:0,0?q=${this.state.address + this.state.addressDetail}`,
+            android: `geo:0,0?q=${this.state.address + this.state.addressDetail}`,
+        })
+
+        Linking.openURL(url)
     }
 
     async _Experience() {
@@ -504,11 +498,14 @@ export default class GoodsDetail extends React.Component {
             ]
         })
         const json = await NetworkCall.Select(url, formBody)
-        console.log(json)
         if (json.length > 0) {
 
             let imagesItemUrl = [];
             let representative = [];
+            if (json[0].representative_file_url != null && json[0].representative_file_url.length > 0) {
+                this.state.repPath = JSON.parse(json[0].representative_file_url)[0]
+            }
+
             if (json[0].image_urls == null || json[0].image_urls.length == 0) {
                 imagesItemUrl.push({ url: 'https://t1.daumcdn.net/cfile/tistory/25257E4753D84EE013' })
                 representative.push('https://t1.daumcdn.net/cfile/tistory/25257E4753D84EE013')
@@ -559,7 +556,6 @@ export default class GoodsDetail extends React.Component {
             } else {
                 mintuesObject = json[0].minutes + I18n.t('goodsMinutes')
             }
-            console.log(representative)
             this.state.country = json[0].country;
             this.state.city = json[0].city;
             this.state.town = json[0].town;
@@ -618,7 +614,6 @@ export default class GoodsDetail extends React.Component {
             ]
         })
         const json = await NetworkCall.Select(url, formBody)
-        console.log('Review', json)
         if (json.reviewInfo.length > 0) {
             for (let i = 0; i < json.reviewInfo.length; i++) {
 
@@ -642,41 +637,45 @@ export default class GoodsDetail extends React.Component {
     }
 
     async _SimilarExperience() {
-
+        let categoryList = [];
+        this.state.categories.map((item, index) => categoryList.push(item.category_no))
         let formBodyExperience = JSON.stringify({
             "ex_no": this.state.exNo,
             "user_no": User.userNo,
             "town": this.state.town,
             "city": this.state.city,
-            "categoryList": JSON.stringify(this.state.categories)
+            "categoryList": JSON.stringify(categoryList)
         })
         const jsonEx = await NetworkCall.Select(ServerUrl.SearchSimilarExperience, formBodyExperience)
-
+        // console.log('Similar', jsonEx)
         for (let i = 0; i < jsonEx.length; i++) {
             let test = [];
+
             if (jsonEx[i].representative_file_url == null || jsonEx[i].representative_file_url.length == 0) {
                 // test.push('https://t1.daumcdn.net/cfile/tistory/25257E4753D84EE013')
+                test.push(null)
             } else {
                 const representativeItem = JSON.parse(jsonEx[i].representative_file_url)
                 for (let i = 0; i < representativeItem.length; i++) {
                     test.push(ServerUrl.Server + representativeItem[i])
                     // FastImage.preload([{ uri: ServerUrl.Server + representativeItem[i], headers: { Authorization: 'authToken' }, }])
                 }
-                const obj = {
-                    title: jsonEx[i].title,
-                    rate: jsonEx[i].rate,
-                    reviewCnt: jsonEx[i].review_cnt,
-                    currency: jsonEx[i].currency == "USD" ? "$" : jsonEx[i].currency == "KRW" ? "₩" : jsonEx[i].currency == "EUR" ? "€" : jsonEx[i].currency == "JPY" ? "¥" : jsonEx[i].currency,
-                    price: jsonEx[i].price,
-                    city: jsonEx[i].city,
-                    country: jsonEx[i].country,
-                    town: Utils.Grinder(User.region.filter((el) => el.town_no == jsonEx[i].town)[0]),
-                    ex_no: jsonEx[i].ex_no,
-                    representative_file_url: test[0],
-                    category: jsonEx[i].categories
-                }
-                this.state.similarDatas.push(obj)
             }
+            const obj = {
+                title: jsonEx[i].title,
+                rate: jsonEx[i].rate,
+                reviewCnt: jsonEx[i].review_cnt,
+                currency: jsonEx[i].currency == "USD" ? "$" : jsonEx[i].currency == "KRW" ? "₩" : jsonEx[i].currency == "EUR" ? "€" : jsonEx[i].currency == "JPY" ? "¥" : jsonEx[i].currency,
+                price: jsonEx[i].price,
+                city: jsonEx[i].city,
+                country: jsonEx[i].country,
+                town: Utils.Grinder(User.region.filter((el) => el.town_no == jsonEx[i].town)[0]),
+                ex_no: jsonEx[i].ex_no,
+                representative_file_url: test[0],
+                category: jsonEx[i].categories
+            }
+            this.state.similarDatas.push(obj)
+
         }
         this._RecommendPlaceExperience()
     }
@@ -684,11 +683,11 @@ export default class GoodsDetail extends React.Component {
     async _RecommendPlaceExperience() {
         let formBodyExperience = JSON.stringify({
             "conditions": [
-                { "q": "order", "f": "distance", "o": "ASC" },
-                { "q": "!=", "f": "ex_no", "v": this.state.exNo },
+                { "op": "AND", "q": "order", "f": "distance", "o": "ASC" },
+                { "op": "AND", "q": "!=", "f": "ex_no", "v": this.state.exNo },
                 // {"q":"having","f":"distance","opt":"<= 5"},
-                { "q": "=", "f": 'status', "v": 1 },
-                { "q": "page", "limit": 6, "offset": 0 }
+                { "op": "AND", "q": "=", "f": "status", "v": 1 },
+                { "op": "AND", "q": "page", "limit": 6, "offset": 0 }
             ],
             "lat": this.state.lat,
             "lng": this.state.lng,
@@ -727,11 +726,11 @@ export default class GoodsDetail extends React.Component {
 
         let formBodyPlace = JSON.stringify({
             "conditions": [
-                { "q": "order", "f": "distance", "o": "ASC" },
+                { "op": "AND", "q": "order", "f": "distance", "o": "ASC" },
                 // {"q":"!=","f":"place_no","v":29},
-                // {"q":"having","f":"distance","opt":"<= 5"},
-                { "q": "=", "f": 'status', "v": 1 },
-                { "q": "page", "limit": 6, "offset": 0 }
+                // { "q": "having", "f": "distance", "opt": "<= 5" },
+                { "op": "AND", "q": "=", "f": "status", "v": 1 },
+                { "op": "AND", "q": "page", "limit": 6, "offset": 0 }
             ],
             "lat": this.state.lat,
             "lng": this.state.lng,
@@ -765,7 +764,6 @@ export default class GoodsDetail extends React.Component {
     }
 
     test = e => {
-        console.log(e.nativeEvent.layout.y)
         this.state.backBtnY = e.nativeEvent.layout.y
     }
 
@@ -780,12 +778,12 @@ export default class GoodsDetail extends React.Component {
         })
 
         const json = await NetworkCall.Select(url, formBody)
-        console.log('_SelectSaved', json)
         if (json.length > 0) {
-            Toast.show({ text1: I18n.t('savedToast') });
             if (flag == 1) {
+                Toast.show({ text1: I18n.t('savedToast') });
                 User.exSaved.push(no)
             } else {
+                Toast.show({ text1: I18n.t('savedContentsToast') });
                 User.placeSaved.push(no)
             }
         }
@@ -803,7 +801,6 @@ export default class GoodsDetail extends React.Component {
         })
 
         const json = await NetworkCall.Select(url, formBody)
-        console.log('_DelectSaved', json)
         if (json.affectedRows == 1) {
             if (flag == 1) {
                 const newList = User.exSaved.filter((item) => item !== no);
@@ -822,7 +819,8 @@ export default class GoodsDetail extends React.Component {
                 <View style={{ backgroundColor: Colors.colorFFFFFF, width: '100%', height: '100%' }}>
                     {this._ImageMagnify()}
                     {this._SharedDialog()}
-                    <ScrollView style={{ backgroundColor: Colors.colorFFFFFF }}>
+
+                    <ScrollView style={{ backgroundColor: Colors.colorFFFFFF }} >
                         {this.state.imagesUrl.length == 1 ? <Image source={{ uri: this.state.imagesUrl[0].url }} style={{ width: '100%', height: (screenWidth - 0) * 0.8113, marginTop: - 58 }}></Image> : (
                             <PagerView style={{ width: '100%', height: (screenWidth - 0) * 0.8113, showsHorizontalScrollIndicator: false, marginTop: - 58 }} showPageIndicator={false} onPageSelected={(e) => this.setState({ pagerViewPosition: e.nativeEvent.position })}>
                                 {this.state.imagesUrl.map((item, index) => (
@@ -862,9 +860,11 @@ export default class GoodsDetail extends React.Component {
 
                         <View style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 16 }}>
                             <View style={{ flexDirection: 'row' }}>
-                                {this.state.buddyProfile.length == 0 ? <Image style={{ width: 40, height: 40, resizeMode: 'cover', borderRadius: 20, }} resizeMethod="resize" source={imgAccount}></Image> : (
-                                    <FastImage style={{ width: 40, height: 40, resizeMode: 'cover', borderRadius: 20 }} source={{ uri: ServerUrl.Server + this.state.buddyProfile, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
-                                )}
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ProfilePage', { userInfo: this.state.createrInfo })}>
+                                    {this.state.buddyProfile.length == 0 ? <Image style={{ width: 40, height: 40, resizeMode: 'cover', borderRadius: 20, }} resizeMethod="resize" source={imgAccount}></Image> : (
+                                        <FastImage style={{ width: 40, height: 40, resizeMode: 'cover', borderRadius: 20 }} source={{ uri: ServerUrl.Server + this.state.buddyProfile, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                    )}
+                                </TouchableOpacity>
                                 <View style={{ marginLeft: 16 }}>
                                     <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{this._TranslateEnToKo(this.state.createrInfo.nickname, I18n.t('goodsExperienceHostedBy'))}</Text>
                                     <Text style={{ marginTop: 4, fontSize: 12, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{this.state.minutes + "・" + this._TranslateEnToKo(this.state.languages, I18n.t('goodsHostedIn'))}</Text>
@@ -1002,7 +1002,7 @@ export default class GoodsDetail extends React.Component {
                                             latitude: this.state.lat,
                                             longitude: this.state.lng,
                                             latitudeDelta: 0.00222,
-                                            longitudeDelta: 0.00121,
+                                            longitudeDelta: 0.00221,
                                         }}
                                         // onMapReady={() => {
                                         //     this.setState({ mapWidth: '100%', lat: this.state.lat, lng: this.state.lng })
@@ -1040,17 +1040,20 @@ export default class GoodsDetail extends React.Component {
                                         <Text style={{ fontSize: 14, fontFamily: 'Raleway-Regular', includeFontPadding: false, color: Colors.color000000, marginTop: 12, marginBottom: 16 }}>{'Your experience link will be sent to you via e-mail after your reservation is created.'}</Text>
                                     </View>
                             ) : (
-                                <View style={{ paddingLeft: 16, paddingRight: 16, marginTop: 12 }}>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('goodsMeteeingPoint')}</Text>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000, marginTop: 12 }}>{this.state.addressDetail}</Text>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color5B5B5B, marginTop: 12 }}>{this.state.address}</Text>
-                                    <View style={{ height: 0.5, backgroundColor: Colors.colorE5E5E5, marginBottom: 16, marginTop: 16 }}></View>
-                                    {/* Requirements */}
-                                    <View style={{ marginBottom: 16, }}>
-                                        <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('goodsRequirements')}</Text>
-                                        <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000, marginTop: 12 }}>{this.state.criteria}</Text>
+                                <TouchableOpacity onPress={() => this._OpenGps(this.state.lat, this.state.lng)}>
+                                    <View style={{ paddingLeft: 16, paddingRight: 16, marginTop: 12 }}>
+                                        <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('goodsMeteeingPoint')}</Text>
+                                        <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000, marginTop: 12 }}>{this.state.addressDetail}</Text>
+                                        <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color5B5B5B, marginTop: 12 }}>{this.state.address}</Text>
+                                        <View style={{ height: 0.5, backgroundColor: Colors.colorE5E5E5, marginBottom: 16, marginTop: 16 }}></View>
+                                        {/* Requirements */}
+                                        <View style={{ marginBottom: 16, }}>
+                                            <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('goodsRequirements')}</Text>
+                                            <Text style={{ fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000, marginTop: 12 }}>{this.state.criteria}</Text>
+                                        </View>
                                     </View>
-                                </View>
+                                </TouchableOpacity>
+
                             ))}
 
                         <View style={{ height: 8, backgroundColor: Colors.colorF4F4F4, }}></View>
@@ -1058,12 +1061,15 @@ export default class GoodsDetail extends React.Component {
                         {/* About Buddy */}
                         <View style={{ paddingLeft: 16, paddingRight: 16, marginTop: 16 }}>
                             <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('goodsAboutBuddy')}</Text>
-                            <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center' }}>
-                                {this.state.buddyProfile.length == 0 ? <Image style={{ width: 28, height: 28, resizeMode: 'cover', borderRadius: 20, }} resizeMethod="resize" source={imgAccount}></Image> : (
-                                    <FastImage style={{ width: 28, height: 28, resizeMode: 'cover', borderRadius: 14 }} source={{ uri: ServerUrl.Server + this.state.buddyProfile, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
-                                )}
-                                <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000, marginLeft: 8 }}>{this.state.createrInfo.nickname}</Text>
-                            </View>
+                            <TouchableOpacity onPress={() => this.props.navigation.navigate('ProfilePage', { userInfo: this.state.createrInfo })} style={{ marginTop: 12 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    {this.state.buddyProfile.length == 0 ? <Image style={{ width: 28, height: 28, resizeMode: 'cover', borderRadius: 20, }} resizeMethod="resize" source={imgAccount}></Image> : (
+                                        <FastImage style={{ width: 28, height: 28, resizeMode: 'cover', borderRadius: 14 }} source={{ uri: ServerUrl.Server + this.state.buddyProfile, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                    )}
+                                    <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.color000000, marginLeft: 8 }}>{this.state.createrInfo.nickname}</Text>
+                                </View>
+                            </TouchableOpacity>
+
 
                             <Text style={{ marginTop: 12, marginBottom: 16, fontSize: 14, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }} numberOfLines={(this.state.experienceBuddyTextFlag == false ? 8 : Number.MAX_VALUE)} ellipsizeMode="tail" onTextLayout={(event) => this._BuddyTextLine(event)}>{this.state.createrInfo.description}</Text>
 
@@ -1211,13 +1217,13 @@ export default class GoodsDetail extends React.Component {
                             <View style={{ marginTop: 15, backgroundColor: Colors.colorF4F4F4, borderRadius: 4, paddingTop: 3, paddingBottom: 3, paddingLeft: 4, paddingRight: 4, height: 46, flexDirection: 'row' }}>
                                 <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ recommendedFalg: 0 })}>
                                     <View style={{ flex: 1, backgroundColor: (this.state.recommendedFalg == 0 ? Colors.colorFFFFFF : Colors.colorF4F4F4), alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 0 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('goodsPlaceText')}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 0 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('contents')}</Text>
                                     </View>
                                 </TouchableOpacity>
                                 <View style={{ width: 14 }}></View>
                                 <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ recommendedFalg: 1 })}>
                                     <View style={{ flex: 1, backgroundColor: (this.state.recommendedFalg == 1 ? Colors.colorFFFFFF : Colors.colorF4F4F4), alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 1 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('goodsExperienceText')}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 1 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('experiences')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
@@ -1228,10 +1234,9 @@ export default class GoodsDetail extends React.Component {
 
                         <View style={{ height: 20 }}></View>
                     </ScrollView>
-
-                    <View style={{ position: 'absolute', top: 0, width: '100%' }}>
-                        <View style={{ width: '100%', alignItems: 'center', paddingLeft: 16, paddingRight: 16, flexDirection: 'row' }} >
-                            <TouchableOpacity onPress={() => this.props.navigation.goBack()} onLayout={(nativeEvent) => this.test(nativeEvent)} style={{ marginTop: 30 }}>
+                    <View style={{ position: 'absolute', top: 20, width: '100%' }}>
+                        <View style={{ width: '100%', alignItems: 'center', paddingLeft: 16, paddingRight: 16, flexDirection: 'row', }} >
+                            <TouchableOpacity onPress={() => this.props.navigation.goBack()} onLayout={(nativeEvent) => this.test(nativeEvent)} >
                                 <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 14 }} >
                                     <Image source={imgBack} style={{ width: 12, height: 12, resizeMode: 'contain' }} ></Image>
                                 </View>
@@ -1242,11 +1247,11 @@ export default class GoodsDetail extends React.Component {
                                     <Image source={User.exSaved.includes(this.state.exNo) == true ? imgBookmarkBlack : imgBookmark} style={{ width: 12, height: 15, tintColor: Colors.color000000 }}></Image>
                                 </View>
                             </TouchableOpacity>
-                            {/* <TouchableOpacity style={{ width: 28, height: 28, marginLeft: 10 }} onPress={() => this.setState({ sharedDialogVisible: true })}>
+                            <TouchableOpacity style={{ width: 28, height: 28, marginLeft: 10 }} onPress={() => this.setState({ sharedDialogVisible: true })}>
                                 <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 14 }}>
                                     <Image source={imgShared} style={{ width: 16, height: 14, resizeMode: 'contain', marginLeft: -2 }}></Image>
                                 </View>
-                            </TouchableOpacity> */}
+                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -1263,7 +1268,7 @@ export default class GoodsDetail extends React.Component {
                                     <Text style={{ fontSize: 14, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{' / ' + I18n.t('goodsPerson')}</Text>
                                 </View>
                                 <View style={{ flex: 1 }}></View>
-                                <TouchableOpacity style={{}} onPress={() => this.props.navigation.navigate('Reserve', { exNo: this.state.exNo })}>
+                                <TouchableOpacity style={{}} onPress={() => User.guest == true ? this.props.navigation.navigate('GuestLogin') : this.props.navigation.navigate('Reserve', { exNo: this.state.exNo })}>
                                     {/* <TouchableOpacity style={{}} onPress={() => Linking.openURL(`${'https://www.budify.io/Experiences/'}` + this.props.route.params.exNo)}> */}
                                     <View style={{ backgroundColor: Colors.color289FAF, borderRadius: 4, alignItems: 'center', justifyContent: 'center', height: 48, paddingLeft: 27, paddingRight: 27 }}>
                                         <Text style={{ fontSize: 16, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.colorFFFFFF }}>{I18n.t('goodsReserve')}</Text>

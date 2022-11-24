@@ -24,12 +24,12 @@ DerivedData
 # Android/IntelliJ
 #
 *.hprof
+*.log
 build/
 .idea
 .gradle
 local.properties
 *.iml
-
 
 # node.js
 #

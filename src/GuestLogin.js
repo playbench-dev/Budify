@@ -17,14 +17,14 @@ import AsyncStorage from '@react-native-community/async-storage';
 import FetchingIndicator from 'react-native-fetching-indicator'
 import Moment from 'moment'
 
-const TAG = "Login"
+const TAG = "GuestLogin"
 const imgBack = require('../assets/ic_back.png');
 const imgEyes = require('../assets/ic_eyes.png');
 const imgFacebook = require('../assets/ic_facebook.png');
 const imgGoogle = require('../assets/ic_google.png');
 const imgApple = require('../assets/ic_apple.png');
 
-export default class Login extends React.Component {
+export default class GuestLogin extends React.Component {
     constructor(props) {
         super(props)
         this.faceLogin = React.createRef();
@@ -252,7 +252,6 @@ export default class Login extends React.Component {
                     User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
                     User.level = json[0].level
                     User.guest = false
-                    console.log(User.level, json[0].level)
 
                     this._Saved(json[0].user_no)
 
@@ -352,9 +351,13 @@ export default class Login extends React.Component {
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: Colors.colorFFFFFF, paddingLeft: 16, paddingRight: 16 }}>
-                    <View style={{ width: '100%', height: 50, flexDirection: 'row', alignItems: 'center', }}>
-                        <Text style={{ fontSize: 20, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false }}>{I18n.t('login')}</Text>
-                    </View>
+                    <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                        <View style={{ width: '100%', height: 50, flexDirection: 'row', alignItems: 'center', }}>
+                            <Image source={imgBack} style={{ width: 20, height: 20, resizeMode: 'contain' }}></Image>
+                            <Text style={{ fontSize: 20, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, marginLeft: 4 }}>{I18n.t('login')}</Text>
+                        </View>
+                    </TouchableOpacity>
+
 
                     <ScrollView style={{ marginTop: 32 }} >
                         <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: 'Raleway-Medium', includeFontPadding: false }}>{I18n.t('email')}</Text>

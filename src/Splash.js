@@ -6,6 +6,7 @@ import User from './Common/User'
 import ServerUrl from './Common/ServerUrl'
 import Moment from 'moment'
 import * as NetworkCall from './Common/NetworkCall'
+import FastImage from 'react-native-fast-image'
 
 const imgLogo = require('../assets/ic_splash_logo.png');
 
@@ -25,7 +26,7 @@ export default class Splash extends React.Component {
     }
 
     componentDidMount() {
-
+        User.guest = true
         Animated.timing(
             this.state.animation,
             {
@@ -111,6 +112,8 @@ export default class Splash extends React.Component {
 
         url = ServerUrl.SelectCategory
         User.category = await NetworkCall.Select(url, formBody)
+        let imageList = [];
+        // User.category.map((item, index) => imageList.push({ uri: ServerUrl.Server + item.image_path }))
 
         url = ServerUrl.SelectLanguage
         User.language = await NetworkCall.Select(url, formBody)
@@ -120,6 +123,8 @@ export default class Splash extends React.Component {
 
         url = ServerUrl.SelectContentsCategory
         User.contentsCategory = await NetworkCall.Select(url, formBody)
+        // User.contentsCategory.map((item, index) => imageList.push({ uri: ServerUrl.Server + item.image_path }))
+        // FastImage.preload(imageList)
 
         url = ServerUrl.SelectBank
         User.bank = await NetworkCall.Select(url, formBody)
@@ -136,7 +141,7 @@ export default class Splash extends React.Component {
                 })
                 this._Login();
             } else {
-                this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
+                this.props.navigation.reset({ index: 0, routes: [{ name: 'Loading' }] })
             }
         });
     }
@@ -180,7 +185,6 @@ export default class Splash extends React.Component {
             response => response.json()
         ).then(
             json => {
-                console.log(TAG, json);
                 if (json.length > 0) {
                     AsyncStorage.setItem('userInfo', JSON.stringify({
                         'user_no': json[0].user_no || '', 'profileUrl': json[0].avatar_url || '', 'password': json[0].password || '',
@@ -200,6 +204,7 @@ export default class Splash extends React.Component {
                     User.phone = json[0].phone
                     User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
                     User.level = json[0].level
+                    User.guest = false
 
                     this._Saved(json[0].user_no)
                 } else {
@@ -221,7 +226,6 @@ export default class Splash extends React.Component {
 
         const exSaved = await NetworkCall.Select(url, formBody)
         let exSavedList = [];
-        console.log('exSaved', exSaved)
         if (exSaved.length > 0) {
             for (let i = 0; i < exSaved.length; i++) {
                 console.log(exSaved[i].content_no)
@@ -248,7 +252,25 @@ export default class Splash extends React.Component {
 
         AsyncStorage.getItem('firstRegion', (err, result) => {
             if (result != null) {
-                this.props.navigation.reset({ index: 0, routes: [{ name: 'Main' }] })
+                console.log(TAG, this.props.route.params)
+                if (this.props.route.params != undefined) {
+                    if (this.props.route.params.link != undefined) {
+                        if (this.props.route.params.key == 'Experiences') {
+                            this.props.navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'GoodsDetail', params: { exNo: this.props.route.params.value } }] })
+                        } else if (this.props.route.params.key == 'Place') {
+                            this.props.navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'PlaceDetail', params: { placeNo: this.props.route.params.value } }] })
+                        } else if (this.props.route.params.key == 'Curation') {
+                            this.props.navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'CurationDetail', params: { curationNo: this.props.route.params.value } }] })
+                        } else if (this.props.route.params.key == 'Travel') {
+                            // this.props.navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'TravelInvite', params: { travelNo: this.props.route.params.value } }] })
+                            this.props.navigation.reset({ index: 0, routes: [{ name: 'Main' }] })
+                        }
+                    } else {
+                        //push
+                    }
+                } else {
+                    this.props.navigation.reset({ index: 0, routes: [{ name: 'Main' }] })
+                }
             } else {
                 this.props.navigation.reset({ index: 0, routes: [{ name: 'SignUpRegion', }] })
             }

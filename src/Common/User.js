@@ -20,4 +20,5 @@ export default class User {
     bank = [];
     exSaved = [];
     placeSaved = [];
+    guest = true;
 }

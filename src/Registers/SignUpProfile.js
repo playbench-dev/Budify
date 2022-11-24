@@ -374,6 +374,7 @@ export default class SignUp extends React.Component {
                     User.phone = json[0].phone
                     User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
                     User.level = json[0].level
+                    User.guest = false
 
                     AsyncStorage.getItem('firstRegion', (err, result) => {
                         if (result != null) {

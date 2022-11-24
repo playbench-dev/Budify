@@ -578,24 +578,24 @@ export default class ContentsInsert extends React.Component {
 
     async _ContentsInsert() {
         let placeObj = {
-            default: this.state.placeDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'default')[0].place,
-            ko: this.state.placeDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ko')[0].place,
-            en: this.state.placeDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'en')[0].place,
-            ja: this.state.placeDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ja')[0].place,
+            default: this.state.placeDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'default')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ko: this.state.placeDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ko')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            en: this.state.placeDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'en')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ja: this.state.placeDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ja')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
         }
         console.log(placeObj)
         let placeSingleInfoObj = {
-            default: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default')[0].placeInfo,
-            ko: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko')[0].placeInfo,
-            en: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en')[0].placeInfo,
-            ja: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja')[0].placeInfo,
+            default: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ko: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            en: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ja: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
         }
 
         let placeInfoObj = {
-            default: this.state.placeInfoDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'default')[0].placeInfo,
-            ko: this.state.placeInfoDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ko')[0].placeInfo,
-            en: this.state.placeInfoDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'en')[0].placeInfo,
-            ja: this.state.placeInfoDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ja')[0].placeInfo,
+            default: this.state.placeInfoDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ko: this.state.placeInfoDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            en: this.state.placeInfoDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
+            ja: this.state.placeInfoDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
         }
         console.log(placeInfoObj)
 
@@ -605,12 +605,12 @@ export default class ContentsInsert extends React.Component {
             console.log(this.state.goodsDatas)
             const defaultObj = {
                 no: i,
-                name: this.state.goodsDatas[i].default,
+                name: this.state.goodsDatas[i].default.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
                 currency: this.state.goodsDatas[i].currency,
                 price: this.state.goodsDatas[i].price,
-                ko: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko')[0].value : '',
-                en: this.state.goodsDatas[i].trans.filter((el) => el.language == 'en').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'en')[0].value : '',
-                ja: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja')[0].value : '',
+                ko: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
+                en: this.state.goodsDatas[i].trans.filter((el) => el.language == 'en').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'en')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
+                ja: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
             }
             defaultList.push(defaultObj)
         }

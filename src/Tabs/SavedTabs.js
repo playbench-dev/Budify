@@ -11,6 +11,8 @@ import User from '../Common/User'
 import ServerUrl from '../Common/ServerUrl';
 import FetchingIndicator from 'react-native-fetching-indicator'
 import * as NetworkCall from '../Common/NetworkCall'
+import FastImage from 'react-native-fast-image';
+import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 
 const TAG = "SavedTabs";
 const imgPlus = require('../../assets/ic_plus.png');
@@ -44,7 +46,8 @@ export default class SavedTabs extends React.Component {
                 country_no: 1,
                 ko: '전체',
                 en: 'All',
-                ja: ''
+                ja: '全国',
+                img_path: User.country[0].img_path,
             }, ...citys]
         })
     }
@@ -64,9 +67,10 @@ export default class SavedTabs extends React.Component {
                     <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('SavedSearch', { select: this.state.cityDatas[(i * 2)] })}>
                         {/* <View style={{ width: ((screenWidth - 46) / 2), height: (((screenWidth - 46) / 2) * 1.1627), alignItems: 'center', justifyContent: 'center', borderRadius: 4, marginLeft: 0, backgroundColor: (this.state.selectedCity == this.state.cityDatas[(i * 2)].no ? Colors.color2D7DC8 : Colors.colorFFFFFF) }}> */}
                         <View style={{ width: ((screenWidth - 46) / 2), height: (((screenWidth - 46) / 2) * 1.1627), borderRadius: 4, marginLeft: 0, }}>
-                            <Image source={imgRegionBg} style={{ resizeMode: 'stretch', width: '100%', height: '100%' }}></Image>
-                            <ImageBackground blurRadius={10} style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center', width: '100%', height: 40, bottom: 0, backgroundColor: 'rgba(0,0,0,0.2)', }}>
-                                <Text style={{ fontSize: 24, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(this.state.cityDatas[(i * 2)])}</Text>
+                            <FastImage style={{ width: '100%', height: '100%', borderRadius: 4, backgroundColor: Colors.colorF4F3F3 }} source={{ uri: ServerUrl.Server + this.state.cityDatas[(i * 2)].img_path, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                            <ImageBackground blurRadius={10} imageStyle={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }} style={{ position: 'absolute', justifyContent: 'center', width: '100%', height: 40, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', paddingLeft: 13, borderBottomLeftRadius: 4, borderBottomRightRadius: 4, paddingRight: 12 }}>
+                                {/* <Text style={{ fontSize: 24, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(this.state.cityDatas[(i * 2)])}</Text> */}
+                                <AutoSizeText style={{ color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} fontSize={14} numberOfLines={1} mode={ResizeTextMode.max_lines}>{Utils.Grinder(this.state.cityDatas[(i * 2)])}</AutoSizeText>
                             </ImageBackground>
                         </View>
                         {/* </View> */}
@@ -76,9 +80,11 @@ export default class SavedTabs extends React.Component {
                         <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('SavedSearch', { select: this.state.cityDatas[(i * 2) + 1] })}>
                             {/* // <View style={{ width: (screenWidth - 46) / 2, height: ((screenWidth - 46) / 2) * 1.1627, alignItems: 'center', justifyContent: 'center', borderRadius: 4, marginLeft: 14, backgroundColor: (this.state.selectedCity == this.state.cityDatas[(i * 2) + 1].no ? Colors.color2D7DC8 : Colors.colorFFFFFF) }}> */}
                             <View style={{ width: ((screenWidth - 46) / 2), height: (((screenWidth - 46) / 2) * 1.1627), borderRadius: 4, marginLeft: 14, }}>
-                                <Image source={imgRegionBg} style={{ resizeMode: 'stretch', width: '100%', height: '100%' }}></Image>
-                                <ImageBackground blurRadius={10} style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center', width: '100%', height: 40, bottom: 0, backgroundColor: 'rgba(0,0,0,0.2)', borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}>
-                                    <Text style={{ fontSize: 24, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(this.state.cityDatas[(i * 2) + 1])}</Text>
+                                <FastImage style={{ width: '100%', height: '100%', borderRadius: 4, backgroundColor: Colors.colorF4F3F3 }} removeClippedSubviews={true} source={{ uri: ServerUrl.Server + this.state.cityDatas[(i * 2) + 1].img_path, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal, }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                {/* <Image source={{ uri: ServerUrl.Server + this.state.cityDatas[(i * 2) + 1].img_path }} resizeMethod="resize" style={{ width: '100%', height: '100%', borderRadius: 4 }}></Image> */}
+                                <ImageBackground blurRadius={10} imageStyle={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }} style={{ position: 'absolute', justifyContent: 'center', width: '100%', height: 40, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', borderBottomLeftRadius: 4, borderBottomRightRadius: 4, paddingLeft: 13, paddingRight: 12 }}>
+                                    {/* <Text style={{ fontSize: 24, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(this.state.cityDatas[(i * 2) + 1])}</Text> */}
+                                    <AutoSizeText style={{ color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} fontSize={14} numberOfLines={1} mode={ResizeTextMode.max_lines}>{Utils.Grinder(this.state.cityDatas[(i * 2) + 1])}</AutoSizeText>
                                 </ImageBackground>
                             </View>
                             {/* </View> */}
@@ -105,32 +111,36 @@ export default class SavedTabs extends React.Component {
                     country_no: 1,
                     ko: '전체',
                     en: 'All',
-                    ja: ''
+                    ja: '全国',
+                    img_path: User.country[0].img_path,
                 }, ...citys],
                 selectedCountry: 1,
             })
             return;
+        } else {
+            value = value.toLowerCase()
         }
-        if (User.country.find(data => data.ko === value || data.en === value || data.ja === value)) {
-            console.log('Find', User.country.find(data => data.ko === value || data.en === value || data.ja === value))
+        if (User.country.find(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)) {
+            console.log('Find', User.country.find(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value))
             this.setState({
-                countryDatas: User.country.filter(data => data.ko === value || data.en === value || data.ja === value),
-                selectedCountry: User.country.filter(data => data.ko === value || data.en === value || data.ja === value)[0].country_no,
+                countryDatas: User.country.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value),
+                selectedCountry: User.country.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no,
                 cityDatas: [{
                     city_no: 0,
-                    country_no: User.country.filter(data => data.ko === value || data.en === value || data.ja === value)[0].country_no,
+                    country_no: User.country.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no,
                     ko: '전체',
                     en: 'All',
-                    ja: ''
-                }, ...User.city.filter(data => data.country_no === User.country.filter(data => data.ko === value || data.en === value || data.ja === value)[0].country_no)]
+                    ja: '全国',
+                    img_path: User.country.filter(el => el.country_no == User.country.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no)[0].img_path,
+                }, ...User.city.filter(data => data.country_no === User.country.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no)]
             })
         } else {
-            if (User.city.find(data => data.ko === value || data.en === value || data.ja === value)) {
+            if (User.city.find(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)) {
                 console.log('Find', User.city.find(data => data.ko === value || data.en === value || data.ja === value))
                 this.setState({
-                    countryDatas: User.country.filter(data => data.country_no === User.city.filter(data => data.ko === value || data.en === value || data.ja === value)[0].country_no),
-                    selectedCountry: User.city.filter(data => data.ko === value || data.en === value || data.ja === value)[0].country_no,
-                    cityDatas: User.city.filter(data => data.ko === value || data.en === value || data.ja === value)
+                    countryDatas: User.country.filter(data => data.country_no === User.city.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no),
+                    selectedCountry: User.city.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)[0].country_no,
+                    cityDatas: User.city.filter(data => data.ko === value || data.en.toLowerCase() === value || data.ja === value)
                 })
             }
         }
@@ -142,7 +152,8 @@ export default class SavedTabs extends React.Component {
             country_no: value,
             ko: '전체',
             en: 'All',
-            ja: ''
+            ja: '全国',
+            img_path: User.country.filter(el => el.country_no == value)[0].img_path,
         }, ...User.city.filter((el) => el.country_no == value)]
         this.setState({
             selectedCountry: value,
@@ -154,12 +165,13 @@ export default class SavedTabs extends React.Component {
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: Colors.colorFFFFFF }}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                         <View style={{ paddingLeft: 16, justifyContent: 'center', paddingTop: 11 }}>
                             <Text style={{ fontSize: 20, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, }}>{I18n.t('savedTitle')}</Text>
+                            <Text style={{ fontSize: 14, color: Colors.color000000, fontFamily: 'Raleway-Medium', includeFontPadding: false, marginTop: 16 }}>{I18n.t('savedSubject')}</Text>
                         </View>
 
-                        <View style={{ padding: 16, width: '100%' }}>
+                        <View style={{ padding: 16, width: '100%', marginTop: 16 }}>
                             <View style={{ borderRadius: 4, borderWidth: 1, borderColor: Colors.color5B5B5B, height: 40, flexDirection: 'row', alignItems: 'center' }}>
                                 <TextInput style={{ flex: 1, fontSize: 12, color: Colors.color000000, fontFamily: "Raleway-Medium", includeFontPadding: false, paddingLeft: 8 }} ellipsizeMode="tail" placeholder={I18n.t('savedSearch')} placeholderTextColor={Colors.colorB7B7B7} onChangeText={(text) => this._SearchText(text)}></TextInput>
                                 <Image source={imgSearch} style={{ width: 15, height: 15, resizeMode: 'contain', marginRight: 8 }}></Image>
@@ -167,13 +179,13 @@ export default class SavedTabs extends React.Component {
 
                             <Text style={{ marginTop: 20, fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{I18n.t('savedByCountry')}</Text>
 
-                            <FlatList style={{ marginTop: 16, height: 128 }} horizontal data={this.state.countryDatas} renderItem={(obj) => {
+                            <FlatList style={{ marginTop: 16, height: 86 }} horizontal data={this.state.countryDatas} renderItem={(obj) => {
                                 return <TouchableWithoutFeedback onPress={() => this._SelectCountry(obj.item.country_no)}>
-                                    <View style={{ width: 128, height: 128, alignItems: 'center', justifyContent: 'center', borderRadius: 78, marginLeft: (obj.index == 0 ? 0 : 12), backgroundColor: this.state.selectedCountry == obj.item.country_no ? Colors.color2D7DC8 : Colors.colorFFFFFF }}>
-                                        <View key={obj.index} style={{ width: 124, height: 124, borderRadius: 100, alignItems: 'center', justifyContent: 'center', }}>
-                                            <Image source={imgCountryBg} style={{ width: 120, height: 120, resizeMode: 'contain' }}></Image>
-                                            <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center', width: 120, height: 120, }}>
-                                                <Text style={{ fontSize: 24, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(obj.item)}</Text>
+                                    <View style={{ width: 86, height: 86, alignItems: 'center', justifyContent: 'center', borderRadius: 78, marginLeft: (obj.index == 0 ? 0 : 12), backgroundColor: this.state.selectedCountry == obj.item.country_no ? Colors.color2D7DC8 : Colors.colorFFFFFF }}>
+                                        <View key={obj.index} style={{ width: 84, height: 84, borderRadius: 100, alignItems: 'center', justifyContent: 'center', }}>
+                                            <FastImage style={{ width: 80, height: 80, borderRadius: 100 }} source={{ uri: ServerUrl.Server + obj.item.img_path, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                            <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center', width: 80, height: 80, }}>
+                                                <Text style={{ fontSize: 16, color: Colors.colorFFFFFF, fontFamily: 'Raleway-Bold', includeFontPadding: false, }} >{Utils.Grinder(obj.item)}</Text>
                                             </View>
                                         </View>
                                     </View>
@@ -181,7 +193,7 @@ export default class SavedTabs extends React.Component {
 
                             }} keyExtractor={(item, index) => index.toString()}></FlatList>
 
-                            <Text style={{ marginTop: 32, fontSize: 16, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, marginBottom: 16 }}>{I18n.t('savedByCity')}</Text>
+                            <Text style={{ marginTop: 20, fontSize: 16, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, marginBottom: 16 }}>{I18n.t('savedByCity')}</Text>
 
                             {this._MakeCityChild()}
                             <View style={{ height: 20 }}></View>

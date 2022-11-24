@@ -439,10 +439,12 @@ export default class CurationInsert extends React.Component {
                 place_no: this.state.selectDatas[i].placeNo,
                 categories: this.state.selectDatas[i].category,
                 place_name: this.state.selectDatas[i].placeName,
+                info: this.state.selectDatas[i].info,
                 country: this.state.selectDatas[i].country,
                 city: this.state.selectDatas[i].city,
                 town: this.state.selectDatas[i].town,
-                images_urls: this.state.selectDatas[i].imageUrls
+                images_urls: this.state.selectDatas[i].imageUrls,
+                repPath: this.state.selectDatas[i].repPath,
             }
             placeList.push(obj)
         }
@@ -543,11 +545,6 @@ export default class CurationInsert extends React.Component {
             "keyword": this.state.searchText,
             "conditions": [
                 {
-                    "q": "=",
-                    "f": "user_no",
-                    "v": User.userNo
-                },
-                {
                     "op": "AND",
                     "q": "=",
                     "f": "status",
@@ -560,21 +557,22 @@ export default class CurationInsert extends React.Component {
 
         for (let i = 0; i < json.list.length; i++) {
             let newImage = [];
-            console.log('namename', json.list[i].place_no)
             if (json.list[i].image_urls != null) {
                 for (let j = 0; j < JSON.parse(json.list[i].image_urls).length; j++) {
-                    FastImage.preload([{ uri: ServerUrl.Server + JSON.parse(json.list[i].image_urls)[j], headers: { Authorization: 'authToken' }, }])
+                    // FastImage.preload([{ uri: ServerUrl.Server + JSON.parse(json.list[i].image_urls)[j], headers: { Authorization: 'authToken' }, }])
                     newImage.push(ServerUrl.Server + JSON.parse(json.list[i].image_urls)[j])
                 }
             }
             const obj = {
                 placeNo: json.list[i].place_no,
                 placeName: JSON.parse(json.list[i].place_name),
+                info: JSON.parse(json.list[i].content),
                 town: json.list[i].town,
                 city: json.list[i].city,
                 country: json.list[i].country,
                 category: JSON.parse(json.list[i].categories.replace(/'/gi, '')),
                 imageUrls: newImage,
+                repPath: JSON.parse(json.list[i].image_representative)[0]
             }
             this.state.searchDatas.push(obj)
         }

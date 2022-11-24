@@ -38,7 +38,7 @@ const imgPayVisa = require('../../../assets/img_pay_visa.png');
 const imgClose = require('../../../assets/ic_close.png')
 const global = [
     { text: 'Credit Card(Amex)', value: 'PLCreditCard' }, // { text: '해외카드(비인증)', value: 'PLCreditCard' },
-    { text: 'Credit Card(Visa/Master/JCB)', value: 'PLCreditCardMpi' },
+    // { text: 'Credit Card(Visa/Master/JCB)', value: 'PLCreditCardMpi' },
     // { text: '해외카드(인증)', value: 'PLCreditCardMpi' },
     // { text: '사이버소스 해외카드', value: 'PLCreditCard_CY' },
     { text: 'UnionPay', value: 'PLUnionPay' }, // { text: '유니온페이', value: 'PLUnionPay' },

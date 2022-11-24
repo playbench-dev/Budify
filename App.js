@@ -9,7 +9,7 @@
 import React from 'react';
 import { Linking } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
-
+import { firebase } from '@react-native-firebase/dynamic-links';
 import Stack from './src/Common/Stack'
 import { navigationRef } from './src/Common/RootNavigation'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -18,6 +18,8 @@ import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import { StackActions } from '@react-navigation/routers';
+
 import User from './src/Common/User'
 
 const TAG = "App";
@@ -29,6 +31,8 @@ class App extends React.Component {
 
   async componentDidMount() {
     this.handleDeepLink();
+    this.getAppLaunchLink();
+    this.unsubscribeDynamicLinks()
     console.log(TAG, messaging().hasPermission());
     this._Notification();
     console.log('I18n ' + I18n.currentLocale())
@@ -50,21 +54,77 @@ class App extends React.Component {
     })
   }
 
+  async getAppLaunchLink() {
+    try {
+      const { url } = await firebase.dynamicLinks().getInitialLink();
+      console.log('APP getAppLaunchLink', url)
+      console.log(url.split('https://www.budify.io/').pop().split('/')[0])
+      if (url.indexOf('https://www.budify.io/'.toLowerCase()) > -1) {
+        console.log('aaaaaaaaa', 'key ' + url.split('https://www.budify.io/').pop().split('/')[0])
+        navigationRef.current.navigate('Splash', { link: true, key: url.split('https://www.budify.io/').pop().split('/')[0], value: url.split('https://www.budify.io/').pop().split('/')[1] })
+      }
+      //handle your link here
+    } catch {
+      //handle errors
+    }
+  };
+
+  unsubscribeDynamicLinks() {
+    firebase.dynamicLinks().onLink(({ url }) => {
+      //handle your url here
+      console.log('APP unsubscribeDynamicLinks', url)
+      if (url.indexOf('https://www.budify.io/'.toLowerCase()) > -1) {
+        // navigationRef.current.navigate('Splash', { link: true, key: url.split('https://www.budify.io/').pop().split('/')[0], value: url.split('https://www.budify.io/').pop().split('/')[1] })
+        if (User.guest == false) {
+          if (url.split('https://www.budify.io/').pop().split('/')[0] == 'Experiences') {
+            // navigationRef.current.navigate('GoodsDetail', { exNo: url.split('https://www.budify.io/').pop().split('/')[1] })
+            navigationRef.current.dispatch(StackActions.push('GoodsDetail', { exNo: url.split('https://www.budify.io/').pop().split('/')[1] }));
+            console.log('get Stack', navigationRef.current.getCurrentRoute().name)
+          } else if (url.split('https://www.budify.io/').pop().split('/')[0] == 'Place') {
+            navigationRef.current.dispatch(StackActions.push('PlaceDetail', { placeNo: url.split('https://www.budify.io/').pop().split('/')[1] }));
+            console.log('get Stack', navigationRef.current.getCurrentRoute().name)
+          } else if (url.split('https://www.budify.io/').pop().split('/')[0] == 'Curation') {
+            navigationRef.current.dispatch(StackActions.push('CurationDetail', { curationNo: url.split('https://www.budify.io/').pop().split('/')[1] }));
+            console.log('get Stack', navigationRef.current.getCurrentRoute().name)
+          } else if (url.split('https://www.budify.io/').pop().split('/')[0] == 'Travel') {
+            // navigationRef.current.dispatch(StackActions.push('TravelInvite', { travelNo: url.split('https://www.budify.io/').pop().split('/')[1] }));
+          }
+        } else {
+          //로그인 안되어있을경우
+        }
+      }
+    });
+  }
+
   handleDeepLink() {
     Linking.getInitialURL().then(res => { //앱이 실행되지 않은 상태에서 요청이 왔을 때
       if (res == null || res == undefined || res == "") {
         return;
       } else {
-        var params = urlParamtersToJson(res);
-        console.log(params);
+        console.log('getInitialURL', res)
+        if (res.indexOf('kakaolink'.toLowerCase()) > -1) {
+          console.log(res.split('?').pop().split('=')[0], res.split('?').pop().split('=')[1])
+          navigationRef.current.navigate('Splash', { link: true, key: res.split('?').pop().split('=')[0], value: res.split('?').pop().split('=')[1] })
+        }
       }
     });
     Linking.addEventListener('url', (e) => {        // 앱이 실행되어있는 상태에서 요청이 왔을 때 처리하는 이벤트 등록
-      var params = urlParamtersToJson(e.url);
-      if (e.url == null || e.url == undefined || e.url == "") {
-        return;
-      } else {
-        console.log(params);
+      console.log('addEventListener', e.url)
+      if (e.url.indexOf('kakaolink'.toLowerCase()) > -1) {
+        console.log(e.url.split('?').pop().split('=')[0], e.url.split('?').pop().split('=')[1])
+        if (User.guest == false) {
+          if (e.url.split('?').pop().split('=')[0] == 'Experiences') {
+            navigationRef.current.dispatch(StackActions.push('GoodsDetail', { exNo: e.url.split('?').pop().split('=')[1] }));
+          } else if (e.url.split('?').pop().split('=')[0] == 'Place') {
+            navigationRef.current.dispatch(StackActions.push('PlaceDetail', { placeNo: e.url.split('?').pop().split('=')[1] }));
+          } else if (e.url.split('?').pop().split('=')[0] == 'Curation') {
+            navigationRef.current.dispatch(StackActions.push('CurationDetail', { curationNo: e.url.split('?').pop().split('=')[1] }));
+          } else if (e.url.split('?').pop().split('=')[0] == 'Travel') {
+            // navigationRef.current.dispatch(StackActions.push('TravelInvite', { travelNo: e.url.split('?').pop().split('=')[1] }));
+          }
+        } else {
+          //로그인 안되어있을경우
+        }
       }
     });
   }

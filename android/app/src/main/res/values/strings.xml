@@ -6,5 +6,5 @@
     <string moduleConfig="true" name="CodePushDeploymentKey">uHWb5saHXQpagMBSkE5ncKhDQh9Gar8PTb3PC</string>
     <string name="appCenterCrashes_whenToSendCrashes" moduleConfig="true" translatable="false">DO_NOT_ASK_JAVASCRIPT</string>
     <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
-    <string name="kakao_app_key">abcdefhggasdas</string>
+    <string name="kakao_app_key">273341293a4bdf5c1eeaaaa33b0ffd7f</string>
 </resources>

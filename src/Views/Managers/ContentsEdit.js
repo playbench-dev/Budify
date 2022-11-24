@@ -626,84 +626,39 @@ export default class ContentsEdit extends React.Component {
 
     async _ContentsUpdate() {
         let placeObj = {
-            default: this.state.placeDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'default')[0].place.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ko: this.state.placeDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ko')[0].place.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            en: this.state.placeDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'en')[0].place.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ja: this.state.placeDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ja')[0].place.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
+            default: this.state.placeDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'default')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ko: this.state.placeDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ko')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            en: this.state.placeDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'en')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ja: this.state.placeDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeDatas.filter((el) => el.language == 'ja')[0].place.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
         }
         console.log(placeObj)
         let placeSingleInfoObj = {
-            default: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ko: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            en: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ja: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
+            default: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ko: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            en: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ja: this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoSingleLineDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
         }
 
         let placeInfoObj = {
-            default: this.state.placeInfoDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ko: this.state.placeInfoDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            en: this.state.placeInfoDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-            ja: this.state.placeInfoDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
+            default: this.state.placeInfoDatas.filter((el) => el.language == 'default').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'default')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ko: this.state.placeInfoDatas.filter((el) => el.language == 'ko').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ko')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            en: this.state.placeInfoDatas.filter((el) => el.language == 'en').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'en')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
+            ja: this.state.placeInfoDatas.filter((el) => el.language == 'ja').length == 0 ? '' : this.state.placeInfoDatas.filter((el) => el.language == 'ja')[0].placeInfo.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') || '',
         }
-        console.log(placeInfoObj)
+        console.log('TEST', placeObj)
 
-        // let defaultList = [];
-        // let koList = [];
-        // let enList = [];
-        // let jaList = [];
-        // for (let i = 0; i < this.state.goodsDatas.filter((el) => el.language == 'default').length; i++) {
-        //     const defaultObj = {
-        //         name: this.state.goodsDatas.filter((el) => el.language == 'default')[i].name.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-        //         currency: this.state.goodsDatas.filter((el) => el.language == 'default')[i].currency || '',
-        //         price: this.state.goodsDatas.filter((el) => el.language == 'default')[i].price || '',
-        //     }
-        //     defaultList.push(defaultObj)
-        // }
-        // for (let i = 0; i < this.state.goodsDatas.filter((el) => el.language == 'ko').length; i++) {
-        //     const koObj = {
-        //         name: this.state.goodsDatas.filter((el) => el.language == 'ko')[i].name.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-        //         currency: this.state.goodsDatas.filter((el) => el.language == 'ko')[i].currency || '',
-        //         price: this.state.goodsDatas.filter((el) => el.language == 'ko')[i].price || '',
-        //     }
-        //     koList.push(koObj)
-        // }
-
-        // for (let i = 0; i < this.state.goodsDatas.filter((el) => el.language == 'en').length; i++) {
-        //     const enObj = {
-        //         name: this.state.goodsDatas.filter((el) => el.language == 'en')[i].name.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-        //         currency: this.state.goodsDatas.filter((el) => el.language == 'en')[i].currency || '',
-        //         price: this.state.goodsDatas.filter((el) => el.language == 'en')[i].price || '',
-        //     }
-        //     enList.push(enObj)
-        // }
-
-        // for (let i = 0; i < this.state.goodsDatas.filter((el) => el.language == 'ja').length; i++) {
-        //     const jaObj = {
-        //         name: this.state.goodsDatas.filter((el) => el.language == 'ja')[i].name.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;') || '',
-        //         currency: this.state.goodsDatas.filter((el) => el.language == 'ja')[i].currency || '',
-        //         price: this.state.goodsDatas.filter((el) => el.language == 'ja')[i].price || '',
-        //     }
-        //     jaList.push(jaObj)
-        // }
-
-        // let goodsObj = {
-        //     default: defaultList,
-        //     ko: koList,
-        //     en: enList,
-        //     ja: jaList
-        // }
         let defaultList = [];
         console.log('click')
         for (let i = 0; i < this.state.goodsDatas.length; i++) {
             console.log(this.state.goodsDatas)
             const defaultObj = {
                 no: i,
-                name: this.state.goodsDatas[i].default,
+                name: this.state.goodsDatas[i].default.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;'),
                 currency: this.state.goodsDatas[i].currency,
                 price: this.state.goodsDatas[i].price,
-                ko: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko')[0].value : '',
-                en: this.state.goodsDatas[i].trans.filter((el) => el.language == 'en').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'en')[0].value : '',
-                ja: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja')[0].value : '',
+                ko: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ko')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
+                en: this.state.goodsDatas[i].trans.filter((el) => el.language == 'en').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'en')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
+                ja: this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja').length > 0 ? this.state.goodsDatas[i].trans.filter((el) => el.language == 'ja')[0].value.replace(/'/gi, '&#039;').replace(/"/gi, '&quot;') : '',
             }
             defaultList.push(defaultObj)
         }
@@ -761,14 +716,14 @@ export default class ContentsEdit extends React.Component {
             "city": this.state.selectedCityNo,
             "town": this.state.selectedRegionNo,
             "address": `\'${this.state.mapSearchText}\'`,
-            "address_detail": `\'${this.state.addressDetail.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;')}\'`,
+            "address_detail": `\'${this.state.addressDetail}\'`,
             "lat": this.state.lat,
             "lng": this.state.lng,
             "tel": `\'${this.state.placeTel}\'`,
             "web": `\'${this.state.placeWeb}\'`,
             "operate_hours": "\'" + JSON.stringify(placeTime) + "\'",
             "product_list": "\'" + JSON.stringify(defaultList) + "\'",
-            "creator_name": `\'${this.state.creatorName.replace(/"/gi, '&quot;').replace(/'/gi, '&#039;')}\'`,
+            "creator_name": `\'${this.state.creatorName}\'`,
             "creator_url": `\'${this.state.creatorUrl}\'`,
         })
         const json = await NetworkCall.Select(url, formBody)
@@ -933,7 +888,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeDatas.length,
                 language: 'default',
-                place: placeName.default
+                place: placeName.default.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeDatas.push(placeObj)
         }
@@ -941,7 +896,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeDatas.length,
                 language: 'ko',
-                place: placeName.ko
+                place: placeName.ko.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeDatas.push(placeObj)
         }
@@ -949,7 +904,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeDatas.length,
                 language: 'en',
-                place: placeName.en
+                place: placeName.en.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeDatas.push(placeObj)
         }
@@ -957,7 +912,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeDatas.length,
                 language: 'ja',
-                place: placeName.ja
+                place: placeName.ja.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeDatas.push(placeObj)
         }
@@ -966,7 +921,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoSingleLineDatas.length,
                 language: 'default',
-                placeInfo: placeTitle.default
+                placeInfo: placeTitle.default.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoSingleLineDatas.push(placeObj)
         }
@@ -974,7 +929,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoSingleLineDatas.length,
                 language: 'ko',
-                placeInfo: placeTitle.ko
+                placeInfo: placeTitle.ko.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoSingleLineDatas.push(placeObj)
         }
@@ -982,7 +937,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoSingleLineDatas.length,
                 language: 'en',
-                placeInfo: placeTitle.en
+                placeInfo: placeTitle.en.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoSingleLineDatas.push(placeObj)
         }
@@ -990,7 +945,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoSingleLineDatas.length,
                 language: 'ja',
-                placeInfo: placeTitle.ja
+                placeInfo: placeTitle.ja.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoSingleLineDatas.push(placeObj)
         }
@@ -999,7 +954,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoDatas.length,
                 language: 'default',
-                placeInfo: placeContents.default
+                placeInfo: placeContents.default.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoDatas.push(placeObj)
         }
@@ -1007,7 +962,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoDatas.length,
                 language: 'ko',
-                placeInfo: placeContents.ko
+                placeInfo: placeContents.ko.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoDatas.push(placeObj)
         }
@@ -1015,7 +970,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoDatas.length,
                 language: 'en',
-                placeInfo: placeContents.en
+                placeInfo: placeContents.en.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoDatas.push(placeObj)
         }
@@ -1023,7 +978,7 @@ export default class ContentsEdit extends React.Component {
             const placeObj = {
                 no: this.state.placeInfoDatas.length,
                 language: 'ja',
-                placeInfo: placeContents.ja
+                placeInfo: placeContents.ja.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             }
             this.state.placeInfoDatas.push(placeObj)
         }
@@ -1036,7 +991,7 @@ export default class ContentsEdit extends React.Component {
                     const koObj = {
                         no: transList.length,
                         language: 'ko',
-                        value: productList[i].ko
+                        value: productList[i].ko.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
                     }
                     transList.push(koObj)
                 }
@@ -1044,7 +999,7 @@ export default class ContentsEdit extends React.Component {
                     const enObj = {
                         no: transList.length,
                         language: 'en',
-                        value: productList[i].en
+                        value: productList[i].en.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
                     }
                     transList.push(enObj)
                 }
@@ -1052,7 +1007,7 @@ export default class ContentsEdit extends React.Component {
                     const jaObj = {
                         no: transList.length,
                         language: 'ja',
-                        value: productList[i].ja
+                        value: productList[i].ja.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
                     }
                     transList.push(jaObj)
                 }

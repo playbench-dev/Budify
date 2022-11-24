@@ -86,8 +86,8 @@ export default class ExperienceTabs extends React.Component {
                 this.state.selectedCityNo = this.props.route.params.city
                 this.state.selectedRegionNo = this.props.route.params.region
                 this.state.selectedCountry = Utils.Grinder(User.country.filter((el) => el.country_no == this.props.route.params.country)[0])
-                this.state.selectedCity = Utils.Grinder(User.city.filter((el) => el.city_no == this.props.route.params.city)[0])
-                this.state.selectedRegion = Utils.Grinder(User.region.filter((el) => el.town_no == this.props.route.params.region)[0])
+                this.state.selectedCity = this.props.route.params.city == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.city.filter((el) => el.city_no == this.props.route.params.city)[0])
+                this.state.selectedRegion = this.props.route.params.region == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.region.filter((el) => el.town_no == this.props.route.params.region)[0])
                 this.state.specialExperienceDatas = [];
                 this.state.totalCnt = 0;
                 this.state.offset = 0;
@@ -104,11 +104,11 @@ export default class ExperienceTabs extends React.Component {
             if (result != null) {
                 const firstRegion = JSON.parse(result);
                 this.state.selectedCountryNo = firstRegion.countryNo;
-                this.state.selectedCityNo = firstRegion.cityNo || -1;
-                this.state.selectedRegionNo = firstRegion.regionNo || -1;
+                this.state.selectedCityNo = firstRegion.cityNo;
+                this.state.selectedRegionNo = firstRegion.regionNo;
                 this.state.selectedCountry = Utils.Grinder(User.country.filter((el) => el.country_no == firstRegion.countryNo)[0]);
-                this.state.selectedCity = Utils.Grinder(User.city.filter((el) => el.city_no == firstRegion.cityNo)[0]);
-                this.state.selectedRegion = Utils.Grinder(User.region.filter((el) => el.town_no == firstRegion.regionNo)[0]);
+                this.state.selectedCity = firstRegion.cityNo == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.city.filter((el) => el.city_no == firstRegion.cityNo)[0]);
+                this.state.selectedRegion = firstRegion.regionNo == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.region.filter((el) => el.town_no == firstRegion.regionNo)[0]);
                 this._Experience()
             }
         })
@@ -126,11 +126,24 @@ export default class ExperienceTabs extends React.Component {
             }
             else if (type == '2') {
                 title = I18n.t('homeCity')
-                datas = User.city.filter((value) => value.country_no == this.state.selectedCountryNo)
+                datas = [{
+                    category_no: this.state.selectedCountryNo,
+                    city_no: 0,
+                    ko: '전체',
+                    en: 'All',
+                    ja: '全国'
+                }, ...User.city.filter((value) => value.country_no == this.state.selectedCountryNo)]
             }
-            else if (type == '3' && this.state.selectedCityNo != -1) {
+            else if (type == '3' && this.state.selectedCityNo != -1 && this.state.selectedCityNo != 0) {
                 title = I18n.t('homeRegion')
-                datas = User.region.filter((value) => value.city_no == this.state.selectedCityNo)
+                datas = [{
+                    category_no: this.state.selectedCountryNo,
+                    city_no: this.state.selectedCityNo,
+                    town_no: 0,
+                    ko: '전체',
+                    en: 'All',
+                    ja: '全国'
+                }, ...User.region.filter((value) => value.city_no == this.state.selectedCityNo)]
             }
             else if (type == '4') {
                 title = I18n.t('homeDate')
@@ -163,7 +176,7 @@ export default class ExperienceTabs extends React.Component {
         } else if (value.type == '3') {
             this.setState({
                 selectDialogVisible: false,
-                selectedRegion: Utils.Grinder(User.region.filter((el) => el.town_no == value.no)[0]),
+                selectedRegion: value.no == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.region.filter((el) => el.town_no == value.no)[0]),
                 selectedRegionNo: value.no,
                 selectedRegionPosition: value.selectedPosition,
                 isFetching: true,
@@ -178,7 +191,7 @@ export default class ExperienceTabs extends React.Component {
             this.regionDatas = [];
             this.setState({
                 selectDialogVisible: false,
-                selectedCity: Utils.Grinder(User.city.filter((el) => el.city_no == value.no)[0]),
+                selectedCity: value.no == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.city.filter((el) => el.city_no == value.no)[0]),
                 selectedRegion: '',
                 selectedRegionPosition: -1,
                 selectedRegionNo: -1,
@@ -280,26 +293,30 @@ export default class ExperienceTabs extends React.Component {
     }
 
     _Bookmark = (flag, no) => {
-        if (flag == 1) {
-            if (User.exSaved != null) {
-                if (User.exSaved.includes(no)) {
-                    this._DelectSaved(flag, no)
-                } else {
-                    this._SelectSaved(flag, no)
-                }
-            } else {
-                this._SelectSaved(flag, no)
-            }
-            console.log(User.exSaved)
+        if (User.guest == true) {
+            this.props.navigation.navigate('GuestLogin')
         } else {
-            if (User.exSaved != null) {
-                if (User.placeSaved.includes(no)) {
-                    this._DelectSaved(flag, no)
+            if (flag == 1) {
+                if (User.exSaved != null) {
+                    if (User.exSaved.includes(no)) {
+                        this._DelectSaved(flag, no)
+                    } else {
+                        this._SelectSaved(flag, no)
+                    }
                 } else {
                     this._SelectSaved(flag, no)
                 }
+                console.log(User.exSaved)
             } else {
-                this._SelectSaved(flag, no)
+                if (User.exSaved != null) {
+                    if (User.placeSaved.includes(no)) {
+                        this._DelectSaved(flag, no)
+                    } else {
+                        this._SelectSaved(flag, no)
+                    }
+                } else {
+                    this._SelectSaved(flag, no)
+                }
             }
         }
     }
@@ -327,12 +344,13 @@ export default class ExperienceTabs extends React.Component {
                     }, {
                         "q": "order",
                         "f": "rate",
-                        "o": "ASC"
+                        "o": "DESC"
                     },
                     {
                         "q": "=",
-                        "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-                        "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+                        // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
                     }
                 ]
             })
@@ -352,8 +370,9 @@ export default class ExperienceTabs extends React.Component {
                         "o": "DESC"
                     }, {
                         "q": "=",
-                        "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-                        "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+                        // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
                     }
                 ]
             })
@@ -405,10 +424,12 @@ export default class ExperienceTabs extends React.Component {
         const json = await NetworkCall.Select(url, formBody)
         console.log('_SelectSaved', json)
         if (json.length > 0) {
-            Toast.show({ text1: I18n.t('savedToast') });
+
             if (flag == 1) {
+                Toast.show({ text1: I18n.t('savedToast') });
                 User.exSaved.push(no)
             } else {
+                Toast.show({ text1: I18n.t('savedContentsToast') });
                 User.placeSaved.push(no)
             }
         }
@@ -447,6 +468,7 @@ export default class ExperienceTabs extends React.Component {
                     {this._CallDialog()}
                     {this._CategoryDialog()}
                     <FlatList
+                        showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
                         onRefresh={() => this.setState({ isRefreshing: true, offset: 0, specialExperienceDatas: [], }, () => this._Experience())}
                         refreshing={this.state.isRefreshing}
                         ListHeaderComponent={

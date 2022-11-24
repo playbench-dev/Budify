@@ -131,10 +131,10 @@ index 3adef00..cf57f28 100644
 +    return <BaseToast style={{ borderLeftColor: '#fff' }} {...props} />;
  }
 diff --git a/node_modules/react-native-toast-message/lib/src/useToast.js b/node_modules/react-native-toast-message/lib/src/useToast.js
-index 5794b67..a0f7bdb 100644
+index 5794b67..b4b633a 100644
 --- a/node_modules/react-native-toast-message/lib/src/useToast.js
 +++ b/node_modules/react-native-toast-message/lib/src/useToast.js
-@@ -9,7 +9,7 @@ export const DEFAULT_DATA = {
+@@ -9,11 +9,11 @@ export const DEFAULT_DATA = {
  };
  export const DEFAULT_OPTIONS = {
      type: 'success',
@@ -143,3 +143,8 @@ index 5794b67..a0f7bdb 100644
      autoHide: true,
      visibilityTime: 4000,
      topOffset: 40,
+-    bottomOffset: 40,
++    bottomOffset: 0,
+     keyboardOffset: 10,
+     onShow: noop,
+     onHide: noop,

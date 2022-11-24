@@ -155,7 +155,7 @@ export default class HostReserveManager extends React.Component {
                                                 <Text style={{ color: Colors.color4D4A4A, fontSize: 14, fontFamily: 'Raleway-Bold', includeFontPadding: false }}>{days.format('D')}</Text>
                                                 <View style={{}}>
                                                     {filterArr.map((item, index) => (
-                                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: index == 0 ? 0 : 0 }}>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: index == 0 ? 4 : 0 }}>
                                                             {index < 3 && (
                                                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: index == 0 ? 0 : 0 }}>
                                                                     <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: item.colors }}></View>

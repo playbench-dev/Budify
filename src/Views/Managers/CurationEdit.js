@@ -431,10 +431,12 @@ export default class CurationEdit extends React.Component {
                 place_no: this.state.selectDatas[i].place_no,
                 categories: this.state.selectDatas[i].categories,
                 place_name: this.state.selectDatas[i].place_name,
+                info: this.state.selectDatas[i].info,
                 country: this.state.selectDatas[i].country,
                 city: this.state.selectDatas[i].city,
                 town: this.state.selectDatas[i].town,
-                images_urls: this.state.selectDatas[i].images_urls
+                images_urls: this.state.selectDatas[i].images_urls,
+                repPath: this.state.selectDatas[i].repPath,
             }
             placeList.push(obj)
         }
@@ -615,11 +617,6 @@ export default class CurationEdit extends React.Component {
             "keyword": this.state.searchText,
             "conditions": [
                 {
-                    "q": "=",
-                    "f": "user_no",
-                    "v": User.userNo
-                },
-                {
                     "op": "AND",
                     "q": "=",
                     "f": "status",
@@ -642,11 +639,13 @@ export default class CurationEdit extends React.Component {
             const obj = {
                 place_no: json.list[i].place_no,
                 place_name: JSON.parse(json.list[i].place_name),
+                info: JSON.parse(json.list[i].content),
                 town: json.list[i].town,
                 city: json.list[i].city,
                 country: json.list[i].country,
                 categories: JSON.parse(json.list[i].categories.replace(/'/gi, '')),
                 images_urls: newImage,
+                repPath: JSON.parse(json.list[i].image_representative)[0]
             }
             this.state.searchDatas.push(obj)
         }

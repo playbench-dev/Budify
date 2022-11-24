@@ -123,12 +123,12 @@ export default class EditProfile extends React.Component {
                     userName: UserInfo.userName,
                     profileUrl: UserInfo.profileUrl,
                     userPhone: UserInfo.phone,
-                    userBio: UserInfo.bio,
+                    userBio: UserInfo.bio == null ? '' : UserInfo.bio,
                     userEmail: UserInfo.email,
-                    selectedBankNo: (UserInfo.bank == -1 || UserInfo.bank == null) ? -1 : UserInfo.bank,
-                    selectedBank: (UserInfo.bank != -1 && UserInfo.bank != null) ? Utils.Grinder(User.bank.filter((el) => el.bank_no == UserInfo.bank)[0]) : '',
-                    selectedCountry: (UserInfo.bank != -1 && UserInfo.bank != null) ? Utils.Grinder(User.country.filter((item) => item.country_no == User.bank.filter((el) => el.bank_no == UserInfo.bank)[0].country_no)[0]) : '',
-                    selectedCountryNo: (UserInfo.bank != -1 && UserInfo.bank != null) ? User.country.filter((item) => item.country_no == User.bank.filter((el) => el.bank_no == UserInfo.bank)[0].country_no)[0].country_no : -1,
+                    selectedBankNo: (UserInfo.bank == null || UserInfo.bank == -1) ? -1 : UserInfo.bank,
+                    selectedBank: (UserInfo.bank == null || UserInfo.bank == -1) ? '' : Utils.Grinder(User.bank.filter((el) => el.bank_no == UserInfo.bank)[0]),
+                    selectedCountry: (UserInfo.bank == null || UserInfo.bank == -1) ? '' : Utils.Grinder(User.country.filter((item) => item.country_no == User.bank.filter((el) => el.bank_no == UserInfo.bank)[0].country_no)[0]),
+                    selectedCountryNo: (UserInfo.bank == null || UserInfo.bank == -1) ? -1 : User.country.filter((item) => item.country_no == User.bank.filter((el) => el.bank_no == UserInfo.bank)[0].country_no)[0].country_no,
                     userBankNum: UserInfo.account_number || '',
                     userBankHolder: UserInfo.account_holder || '',
                 })
@@ -318,6 +318,7 @@ export default class EditProfile extends React.Component {
         AsyncStorage.clear()
         User.exSaved = [];
         User.placeSaved = [];
+        User.guest = true;
         this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
     }
 
@@ -345,6 +346,9 @@ export default class EditProfile extends React.Component {
             json => {
                 console.log(TAG, json);
                 AsyncStorage.clear()
+                User.exSaved = [];
+                User.placeSaved = [];
+                User.guest = true;
                 this.props.navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
             })
     }
@@ -400,6 +404,8 @@ export default class EditProfile extends React.Component {
                     User.phone = json[0].phone
                     User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
                     User.level = json[0].level
+                    User.guest = false
+
                     this.setState({ isFetching: false, profileUrl: json[0].avatar_url })
                 } else {
                     this.setState({ isFetching: false })
@@ -418,7 +424,7 @@ export default class EditProfile extends React.Component {
             "name": `\'${this.state.userName}\'`,
             "nickname": `\'${this.state.userNickname}\'`,
             "phone": `\'${this.state.userPhone}\'`,
-            "bio": `\'${this.state.userBio.length == 0 ? "" : this.state.userBio}\'`,
+            "bio": `\'${this.state.userBio == null || this.state.userBio.length == 0 ? "" : this.state.userBio}\'`,
             "account_holder": this.state.userBankHolder.length == 0 ? null : `\'${this.state.userBankHolder}\'`,
             "account_number": this.state.userBankNum.length == 0 ? null : `\'${this.state.userBankNum}\'`,
             "bank": this.state.selectedBankNo == -1 ? null : `\'${this.state.selectedBankNo}\'`,
@@ -458,6 +464,7 @@ export default class EditProfile extends React.Component {
                     User.phone = json[0].phone
                     User.snsLogin = json[0].auth_provider == 'Email' || json[0].auth_provider == '' || json[0].auth_provider == null ? false : true
                     User.level = json[0].level
+                    User.guest = false
 
                     this.setState({ isFetching: false })
                     this.props.navigation.reset({ index: 0, routes: [{ name: 'Main', params: { screen: I18n.t('profile') } }] });

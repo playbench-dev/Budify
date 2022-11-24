@@ -49,6 +49,9 @@ export default class PaymentWeb extends React.Component {
                             // if (event.url.startsWith("http")) {
                             //     Linking.openURL(event.url);
                             // }
+                            if (event.url.indexOf('popupCancel') > -1) {
+                                this.props.navigation.goBack()
+                            }
                             if (
                                 Platform.OS === 'android' &&
                                 event.url.startsWith("intent")

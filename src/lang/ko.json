@@ -1,9 +1,11 @@
 {
     //Toast
     "savedToast":"경험 상품 1개가 저장되었어요!",
+    "savedContentsToast":"장소가 저장 되었어요!",
     //Loading
     "login": "로그인",
     "signUp": "회원가입",
+    "guest": "둘러보기",
     //Login
     "email": "이메일",
     "emailHint": "example@budify.co.kr",
@@ -54,30 +56,31 @@
     "pwdEmailSuccess": "이메일을 확인해주세요",
     "emailCheckSNS":"소셜 로그인 회원입니다.",
     //MainTab
-    "experiences": "경험",
-    "contents": "콘텐츠",
-    "saved": "저장함",
+    "experiences": "체험",
+    "contents": "장소",
+    "saved": "플래너",
     "profile": "프로필",
     //HomeTabs
-    "homeTabTitle": "다가오는 여행 일정",
+    "homeTabTitle": "여행 일정을 짜보세요",
     "homeCountry":"국가",
     "homeCity":"도시",
     "homeRegion":"지역",
     "homeDate":"일정",
-    "homeExperiencesTitle":"에서 예약 가능한 특별한 경험",
+    "homeExperiencesTitle":"Budify가 추천하는 체험 상품",
     "homePlaceTitle":"에서 방문 가능한 특별한 공간",
-    "homeEatDrinkTitle":"의 맛집과 카페",
-    "homeMustPlacesTitle":"의 대표 명소",
-    "homeNewExperience": "신규 경험 상품",
+    "homeEatDrinkTitle":"의 맛을 느껴보세요",
+    "homeMustPlacesTitle":"를 즐기는 특별한 방법",
+    "homeNewExperience": "New",
     "homeDone": "완료",
     "homeInvitation":"초대장",
     "homeInvitateContent":"",
     "homeAccept":"수락하기",
     "homeDecline":"거절하기",
     //Experiences
-    "experienceLanguage":"언어",
+    "experienceLanguage":"진행언어",
     //SavedTabs
-    "savedTitle":"저장함",
+    "savedTitle":"나만의 여행 일정을 짜보세요.",
+    "savedSubject":"내가 저장한 체험과 장소를 모아보고,\n나만의 여행 일정을 만드세요!",
     "savedSearch":"검색",
     "savedByCountry":"국가 별 보기",
     "savedByCity":"도시 별 보기",
@@ -85,6 +88,14 @@
     "savedTitleHint": "여행 제목을 입력하세요",
     "savedAddAgenda": "일정 추가하기",
     "savedAddMemo": "메모",
+    "savedReturn":"돌아가기",
+    "savedReturnContent":"내용을 저장하시겠습니까?",
+    "savedReturnDone":"저장하기",
+    "savedReturnCancel":"아니오",
+    "savedSaveBtn":"저장하기",
+    "savedRemoveBtn":"삭제하기",
+    "savedRemoveDialogText":"일정을 정말 삭제하시겠습니까?\n삭제한 일정의 데이터가 모두 삭제됩니다.",
+    "savedRemoveDialogBtn":"일정 삭제하기",
     //ContentsTabs
     "contentsTitle":"여행 콘텐츠",
     "contentsTabPlaces":"공간",
@@ -95,7 +106,7 @@
     "contentsSearch":"검색",
     "contentsCategories":"카테고리",
     "contentsDate":"날짜",
-    "contentsTime":"시간",
+    "contentsTime":"운영시간",
     "contentsSaved":"저장",
     "contentsDone":"완료",
     "contentsTrending":"지금 뜨는 공간",
@@ -114,6 +125,8 @@
     "profileReserveExperiences":"예약 관리",
     "profileHostRecent":"최근 예약",
     "profileHostHistory":"정산 내역",
+    "profileExRejected":"거절 완료",
+    "profileExAccept":"수락 완료",
     //ManageProfile
     "managerTitle":"Budify 관리 페이지",
     "managerContents":"콘텐츠 등록 및 관리",
@@ -440,8 +453,8 @@
     "goodsReadMore2":"더 보기",
     "goodsReview":"리뷰",
     "goodsShowAll2":"전체 보기",
-    "goodsSimilar":"유사한 경험",
-    "goodsRecommended":"추천 공간과 경험",
+    "goodsSimilar":"유사한 체험",
+    "goodsRecommended":"함께 하면 좋은 장소와 체험",
     "goodsPlaceText":"공간",
     "goodsExperienceText":"경험",
     "goodsSaved":"저장",
@@ -456,6 +469,7 @@
     "shareOnKakao":"카카오톡 보내기",
     "shareOnInstagram":"인스타그램 스토리 올리기",
     "shareOnWhatsApp":"What’s App 보내기",
+    "shareOnLine":"라인 보내기",
     "shareMore":"공유 방법 더보기",
     //Review
     "reviewTitle":"리뷰 작성하기",
@@ -489,7 +503,7 @@
     "placeDetailSun":"일요일",
     "placeDetailPriceInfo":"가격 정보",
     "placeDetailSavedText":"저장",
-    "placeDetailRelated":"유사한 공간",
+    "placeDetailRelated":"유사한 장소",
     //Reserve
     "ReserveTitle":"예약하기",
     "ReserveDateTime":"날짜와 시간",
@@ -508,5 +522,10 @@
     "PaymentTitle":"결제하기",
     "PaymentGlobalTitle":"해외결제",
     "PaymentKoreanTitle":"국내결제",
-    "PaymentSelectMethod":"결제수단"
+    "PaymentSelectMethod":"결제수단",
+    //ProfilePage
+    "profilePageUserTitle":"프로필",
+    "profilePageUserEx":"구매한 경험",
+    "profilePageUserTrips":"여행 일정",
+    "profilePageUserHosted":"판매 중인 경험"
 }

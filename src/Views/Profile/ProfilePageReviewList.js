@@ -11,12 +11,12 @@ import User from '../../Common/User';
 import FetchingIndicator from 'react-native-fetching-indicator'
 import Moment from 'moment';
 
-const TAG = "ReviewList"
+const TAG = "ProfilePageReviewList"
 const imgBack = require('../../../assets/ic_back.png');
 const imgStarOn = require('../../../assets/ic_star.png');
 const imgAccount = require('../../../assets/account_circle.png')
 
-export default class ReviewList extends React.Component {
+export default class ProfilePageReviewList extends React.Component {
     constructor(props) {
         super(props)
         this.flatListRef = React.createRef()
@@ -48,26 +48,9 @@ export default class ReviewList extends React.Component {
     }
 
     async _Reviews() {
-        const url = ServerUrl.SelectReview
-        console.log(this.props.route.params.exNo)
+        let url = ServerUrl.SelectReviewBySellerUserNo
         let formBody = JSON.stringify({
-            "conditions": [
-                {
-                    "q": "=",
-                    "f": "ex_no",
-                    "v": this.props.route.params.exNo
-                    // "v": 178
-                },
-                {
-                    "q": "page",
-                    "limit": "12",
-                    "offset": this.state.offset
-                }, {
-                    "q": "order",
-                    "f": "c_dt",
-                    "o": "DESC"
-                }
-            ]
+            "user_no": this.props.route.params.userNo,
         })
         const json = await NetworkCall.Select(url, formBody)
         if (json.reviewInfo.length > 0) {

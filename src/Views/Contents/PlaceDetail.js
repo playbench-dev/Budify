@@ -1,5 +1,5 @@
 import React from 'react'
-import { SafeAreaView, View, Text, Image, FlatList, ScrollView, TouchableWithoutFeedback, Dimensions, ImageBackground, Modal, TextInput, TouchableOpacity, Animated, Linking, } from 'react-native'
+import { SafeAreaView, View, Text, Image, FlatList, ScrollView, TouchableWithoutFeedback, Dimensions, ImageBackground, Modal, TextInput, TouchableOpacity, Animated, Linking, Share } from 'react-native'
 import Colors from '../../Common/Colos'
 import I18n from '../../lang/i18n';
 import * as Utils from '../../Common/Utils'
@@ -17,6 +17,10 @@ import Carousel from 'react-native-snap-carousel'
 import User from '../../Common/User';
 import FetchingIndicator from 'react-native-fetching-indicator'
 import Moment from 'moment'
+import Clipboard from '@react-native-clipboard/clipboard';
+import { firebase } from '@react-native-firebase/dynamic-links';
+import KakaoShareLink from 'react-native-kakao-share-link';
+import ShareLib from 'react-native-share'
 
 const TAG = "PlaceDetail"
 const imgBack = require('../../../assets/ic_back.png');
@@ -28,9 +32,12 @@ const imgStarOff = require('../../../assets/ic_star_off.png');
 const imgCircleSaveBg = require('../../../assets/ic_circle_saved.png');
 const imgLinkBg = require('../../../assets/ic_link_bg.png');
 const imgInstargramBg = require('../../../assets/ic_link_instagram_bg.png');
+const imgInstargram = require('../../../assets/ic_instagram.png');
 const imgLinkKakao = require('../../../assets/ic_link_kakao.png');
 const imgLinkMore = require('../../../assets/ic_link_more.png');
 const imgLink = require('../../../assets/ic_link.png');
+const imgWhatapp = require('../../../assets/ic_whatapp.png');
+const imgLine = require('../../../assets/ic_line.png');
 const imgAccount = require('../../../assets/account_circle.png')
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -54,6 +61,7 @@ export default class PlaceDetail extends React.Component {
         town: '',
         townNo: -1,
         representative_file_url: [],
+        repPath: '',
         category: [],
         categoryRelated: [],
         pagerViewPosition: 0,
@@ -220,18 +228,22 @@ export default class PlaceDetail extends React.Component {
     }
 
     _Bookmark = (flag, no) => {
-        if (flag == 1) {
-            if (User.exSaved.includes(no)) {
-                this._DelectSaved(flag, no)
-            } else {
-                this._SelectSaved(flag, no)
-            }
-            console.log(User.exSaved)
+        if (User.guest == true) {
+            this.props.navigation.navigate('GuestLogin')
         } else {
-            if (User.placeSaved.includes(no)) {
-                this._DelectSaved(flag, no)
+            if (flag == 1) {
+                if (User.exSaved.includes(no)) {
+                    this._DelectSaved(flag, no)
+                } else {
+                    this._SelectSaved(flag, no)
+                }
+                console.log(User.exSaved)
             } else {
-                this._SelectSaved(flag, no)
+                if (User.placeSaved.includes(no)) {
+                    this._DelectSaved(flag, no)
+                } else {
+                    this._SelectSaved(flag, no)
+                }
             }
         }
     }
@@ -309,6 +321,77 @@ export default class PlaceDetail extends React.Component {
         }
     }
 
+    async DynamicLink(params, value, type) {
+        console.log(ServerUrl.Server + this.state.repPath)
+        const link = await firebase.dynamicLinks().buildShortLink({
+            link: `https://www.budify.io/${params}/${value}`,
+            // domainUriPrefix is created in your Firebase console
+
+            // optional setup which updates Firebase analytics campaign
+            // "banner". This also needs setting up before hand
+            ios: {
+                appStoreId: '1639221225',
+                bundleId: 'org.ReactNativeBudify'
+            },
+            android: {
+                packageName: 'com.reactnativebudify'
+            },
+            domainUriPrefix: 'https://reactnativebudify.page.link',
+            social: {
+                title: this.state.placeName,
+                descriptionText: this.state.info,
+                imageUrl: ServerUrl.Server + this.state.repPath
+            }
+        }).then((shortLink) => {
+            console.log(shortLink)
+            if (type == 1) {
+                this.setState({ sharedDialogVisible: false, }, () => {
+                    Toast.show({ text1: 'Copied.' });
+                    Clipboard.setString(shortLink)
+                })
+            } else if (type == 2) {
+                Linking.openURL('whatsapp://send?text=' + shortLink)
+            } else if (type == 3) {
+                this.setState({ sharedDialogVisible: false, }, () => this.props.navigation.navigate('InstagramShared', { link: shortLink, repPath: this.state.repPath, title: this.state.placeName, contents: this.state.info, category: Utils.Grinder(User.contentsCategory.filter((el) => el.category_no == this.state.category[0])[0]), city: this.state.town }))
+            } else if (type == 4) {
+                KakaoShareLink.sendFeed({
+                    content: {
+                        title: this.state.placeName,
+                        description: this.state.info,
+                        imageHeight: 120,
+                        imageUrl: ServerUrl.Server + this.state.repPath,
+                        link: {
+                            webUrl: `https://www.budify.io/${params}/${value}`,
+                            mobileWebUrl: shortLink,
+                        },
+                    },
+                    buttons: [
+                        {
+                            title: '앱에서 보기',
+                            link: {
+                                androidExecutionParams: [{ key: params, value: '' + value }],
+                                iosExecutionParams: [{ key: params, value: '' + value }],
+                            },
+                        },
+                    ],
+                });
+            } else if (type == 5) {
+                Linking.openURL('http://line.me/R/msg/text/?' + shortLink)
+            } else if (type == 6) {
+                Share.share({
+                    title: shortLink,
+                    url: shortLink
+                })
+                // ShareLib.open({
+                //     title: '',
+                //     url: shortLink,
+                //     message: '',
+                //     subject: ''
+                // })
+            }
+        });
+    }
+
     _SharedDialog() {
         return (
             <Modal transparent={true} visible={this.state.sharedDialogVisible}>
@@ -320,50 +403,55 @@ export default class PlaceDetail extends React.Component {
                                 <View style={{ marginTop: 12, height: 1, backgroundColor: Colors.colorBFBFBF }}></View>
 
                                 <View style={{ marginTop: 20 }}>
-                                    <TouchableWithoutFeedback >
+                                    <TouchableOpacity style={{}} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 1)}>
                                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.color569BEF }}>
                                                 <Image source={imgLink} style={{ width: 17, height: 9 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareCopyLink')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 2)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <Image style={{ width: 32, height: 32, resizeMode: 'contain' }} source={imgWhatapp}></Image>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnWhatsApp')}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 3)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <ImageBackground source={imgInstargramBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Image style={{ width: 20, height: 16, resizeMode: 'contain' }} source={imgInstargram}></Image>
+                                            </ImageBackground>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnInstagram')}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 4)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
                                                 <Image source={imgLinkKakao} style={{ width: 20, height: 16 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnKakao')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                                            <ImageBackground source={imgInstargramBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
-                                                <Image style={{ width: 20, height: 16 }}></Image>
-                                            </ImageBackground>
-                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnInstagram')}</Text>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 5)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                            <Image style={{ width: 32, height: 32, resizeMode: 'contain' }} source={imgLine}></Image>
+                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnLine')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
 
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                                            <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.color569BEF }}>
-                                                <Image style={{ width: 17, height: 9 }}></Image>
-                                            </ImageBackground>
-                                            <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareOnWhatsApp')}</Text>
-                                        </View>
-                                    </TouchableWithoutFeedback>
-
-                                    <TouchableWithoutFeedback>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                    <TouchableOpacity style={{ marginTop: 10 }} onPress={() => this.DynamicLink('Place', this.props.route.params.placeNo, 6)}>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                             <ImageBackground source={imgLinkBg} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }} imageStyle={{ tintColor: Colors.colorD9D9D9 }}>
                                                 <Image source={imgLinkMore} style={{ width: 13, height: 3 }}></Image>
                                             </ImageBackground>
                                             <Text style={{ marginLeft: 9, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{I18n.t('shareMore')}</Text>
                                         </View>
-                                    </TouchableWithoutFeedback>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -388,16 +476,18 @@ export default class PlaceDetail extends React.Component {
         const json = await NetworkCall.Select(url, formBody)
         console.log(json)
         for (let i = 0; i < json.length; i++) {
-            console.log('TEST : ', JSON.parse(json[0].image_urls))
-            for (let j = 0; j < JSON.parse(json[0].image_urls).length; j++) {
-                // FastImage.preload([{ uri: ServerUrl.Server + JSON.parse(json[0].image_urls)[j], headers: { Authorization: 'authToken' }, }])
-                this.state.imagesUrl.push(ServerUrl.Server + JSON.parse(json[0].image_urls)[j])
+            if (json[0].image_urls != null) {
+                console.log('TEST : ', JSON.parse(json[0].image_urls))
+                for (let j = 0; j < JSON.parse(json[0].image_urls).length; j++) {
+                    // FastImage.preload([{ uri: ServerUrl.Server + JSON.parse(json[0].image_urls)[j], headers: { Authorization: 'authToken' }, }])
+                    this.state.imagesUrl.push(ServerUrl.Server + JSON.parse(json[0].image_urls)[j])
+                }
             }
-
             const dateTimeList = json[0].operate_hours != undefined && JSON.parse(json[0].operate_hours)
             // const productList = json[0].product_list != undefined && JSON.parse(json[0].product_list)
 
             console.log('dateTimeList', dateTimeList)
+
             const moObj = {
                 day: I18n.t('managerContentsInsertMon'),
                 bTime: dateTimeList.mo.open,
@@ -439,11 +529,11 @@ export default class PlaceDetail extends React.Component {
                 bTime: dateTimeList.su.open,
                 aTime: dateTimeList.su.close,
             }
-
             //장소 가격정보
-            console.log('productList', JSON.parse(json[0].product_list))
+            // console.log('productList', JSON.parse(json[0].product_list))
+            // console.log('type', json[0].product_list)
             if (json[0].product_list != null) {
-                console.log('not null')
+                console.log('not null', json[0].product_list)
                 for (let i = 0; i < JSON.parse(json[0].product_list).length; i++) {
                     console.log(JSON.parse(json[0].product_list)[i].no, JSON.parse(json[0].product_list)[i].ko)
                     if (this.state.lang == 'ko') {
@@ -476,96 +566,11 @@ export default class PlaceDetail extends React.Component {
                     }
                 }
             }
-            // if (this.state.lang == 'ko') {
-            //     console.log('productList', productList.no == undefined ? 'undefined' : 'no undefined')
-            //     if (productList.ko != undefined && productList.ko.length > 0) {
-            //         for (let i = 0; i < productList.ko.length; i++) {
-            //             const productObj = {
-            //                 no: this.state.productDatas.length,
-            //                 language: 'ko',
-            //                 name: productList.ko[i].name,
-            //                 currency: productList.ko[i].currency == "USD" ? "$" : productList.ko[i].currency == "KRW" ? "₩" : productList.ko[i].currency == "EUR" ? "€" : productList.ko[i].currency == "JPY" ? "¥" : productList.ko[i].currency,
-            //                 price: productList.ko[i].price,
-            //             }
-            //             this.state.productDatas.push(productObj)
-            //         }
-            //     } else {
-            //         if (productList.default != undefined) {
-            //             for (let i = 0; i < productList.default.length; i++) {
-            //                 if (productList.default[i].name.length > 0) {
-            //                     const productObj = {
-            //                         no: this.state.productDatas.length,
-            //                         language: 'default',
-            //                         name: productList.default[i].name,
-            //                         currency: productList.default[i].currency == "USD" ? "$" : productList.default[i].currency == "KRW" ? "₩" : productList.default[i].currency == "EUR" ? "€" : productList.default[i].currency == "JPY" ? "¥" : productList.default[i].currency,
-            //                         price: productList.default[i].price,
-            //                     }
-            //                     this.state.productDatas.push(productObj)
-            //                 }
-            //             }
-            //         }
-            //     }
-            // } else if (this.state.lang == 'ja') {
-            //     if (productList.ja != undefined && productList.ja.length > 0) {
-            //         for (let i = 0; i < productList.ja.length; i++) {
-            //             const productObj = {
-            //                 no: this.state.productDatas.length,
-            //                 language: 'ja',
-            //                 name: productList.ja[i].name,
-            //                 currency: productList.ja[i].currency == "USD" ? "$" : productList.ja[i].currency == "KRW" ? "₩" : productList.ja[i].currency == "EUR" ? "€" : productList.ja[i].currency == "JPY" ? "¥" : productList.ja[i].currency,
-            //                 price: productList.ja[i].price,
-            //             }
-            //             this.state.productDatas.push(productObj)
-            //         }
-            //     } else {
-            //         if (productList.default != undefined) {
-            //             for (let i = 0; i < productList.default.length; i++) {
-            //                 if (productList.default[i].name.length > 0) {
-            //                     const productObj = {
-            //                         no: this.state.productDatas.length,
-            //                         language: 'default',
-            //                         name: productList.default[i].name,
-            //                         currency: productList.default[i].currency == "USD" ? "$" : productList.default[i].currency == "KRW" ? "₩" : productList.default[i].currency == "EUR" ? "€" : productList.default[i].currency == "JPY" ? "¥" : productList.default[i].currency,
-            //                         price: productList.default[i].price,
-            //                     }
-            //                     this.state.productDatas.push(productObj)
-            //                 }
-            //             }
-            //         }
-            //     }
-            // } else if (this.state.lang == 'en') {
-            //     if (productList.en != undefined && productList.en.length > 0) {
-            //         for (let i = 0; i < productList.en.length; i++) {
-            //             const productObj = {
-            //                 no: this.state.productDatas.length,
-            //                 language: 'en',
-            //                 name: productList.en[i].name,
-            //                 currency: productList.en[i].currency == "USD" ? "$" : productList.en[i].currency == "KRW" ? "₩" : productList.en[i].currency == "EUR" ? "€" : productList.en[i].currency == "JPY" ? "¥" : productList.en[i].currency,
-            //                 price: productList.en[i].price,
-            //             }
-            //             this.state.productDatas.push(productObj)
-            //         }
-            //     } else {
-            //         if (productList.default != undefined) {
-            //             for (let i = 0; i < productList.default.length; i++) {
-            //                 if (productList.default[i].name.length > 0) {
-            //                     const productObj = {
-            //                         no: this.state.productDatas.length,
-            //                         language: 'default',
-            //                         name: productList.default[i].name,
-            //                         currency: productList.default[i].currency == "USD" ? "$" : productList.default[i].currency == "KRW" ? "₩" : productList.default[i].currency == "EUR" ? "€" : productList.default[i].currency == "JPY" ? "¥" : productList.default[i].currency,
-            //                         price: productList.default[i].price,
-            //                     }
-            //                     this.state.productDatas.push(productObj)
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
             this.state.placeTimeDatas.push(suObj)
-            this.state.placeName = Utils.GrinderContents(JSON.parse(json[i].place_name.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')))
-            this.state.singleInfo = Utils.GrinderContents(JSON.parse(json[i].title.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')))
-            this.state.info = Utils.GrinderContents(JSON.parse(json[i].content.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')))
+            console.log('jj', json[i].title)
+            this.state.placeName = Utils.GrinderContents(JSON.parse(json[i].place_name)).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
+            this.state.singleInfo = Utils.GrinderContents(JSON.parse(json[i].title)).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
+            this.state.info = Utils.GrinderContents(JSON.parse(json[i].content)).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"')
             this.state.rate = json[i].rate
             this.state.reviewCnt = json[i].review_cnt
             // currency: json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency,
@@ -577,6 +582,7 @@ export default class PlaceDetail extends React.Component {
             this.state.townNo = json[i].town
             this.state.place_no = json[i].place_no
             this.state.representative_file_url = ServerUrl.Server + JSON.parse(json[i].image_representative)
+            this.state.repPath = JSON.parse(json[i].image_representative)
             this.state.category = JSON.parse(json[i].categories.replace(/'/gi, ''))
             this.state.categoryRelated = json[i].categories
             this.state.creatorImage = ServerUrl.Server + JSON.parse(json[i].image_creator)
@@ -589,7 +595,7 @@ export default class PlaceDetail extends React.Component {
             this.state.placeTel = json[i].tel
             this.state.placeWeb = json[i].web
         }
-
+        console.log('bbbb')
         this._ReviewSelect(0)
     }
 
@@ -695,7 +701,7 @@ export default class PlaceDetail extends React.Component {
                 { "op": "AND", "q": "order", "f": "distance", "o": "ASC" },
                 // { "q": "!=", "f": "ex_no", "v": this.state.exNo },
                 // {"q":"having","f":"distance","opt":"<= 5"},
-                { "op": "AND", "q": "=", "f": 'status', "v": 1 },
+                { "op": "AND", "q": "=", "f": "status", "v": 1 },
                 { "op": "AND", "q": "page", "limit": 6, "offset": 0 }
             ],
             "lat": this.state.lat,
@@ -738,7 +744,7 @@ export default class PlaceDetail extends React.Component {
                 { "op": "AND", "q": "order", "f": "distance", "o": "ASC" },
                 { "op": "AND", "q": "!=", "f": "place_no", "v": this.props.route.params.placeNo },
                 // {"q":"having","f":"distance","opt":"<= 5"},
-                { "op": "AND", "q": "=", "f": 'status', "v": 1 },
+                { "op": "AND", "q": "=", "f": "status", "v": 1 },
                 { "op": "AND", "q": "page", "limit": 6, "offset": 0 }
             ],
             "lat": this.state.lat,
@@ -782,6 +788,19 @@ export default class PlaceDetail extends React.Component {
         })
     }
 
+    _OpenGps = (lat, lng) => {
+        // var scheme = Platform.OS === 'ios' ? 'maps:' : 'geo:';
+        // var url = scheme + `${lat},${lng}`;
+        // Linking.openURL(url);
+
+        const url = Platform.select({
+            ios: `maps:0,0?q=${this.state.address + this.state.addressDetail}`,
+            android: `geo:0,0?q=${this.state.address + this.state.addressDetail}`,
+        })
+
+        Linking.openURL(url)
+    }
+
     _carouselItem = ({ item, index }) => {
         console.log('!!!!' + item)
         return (
@@ -805,10 +824,11 @@ export default class PlaceDetail extends React.Component {
         const json = await NetworkCall.Select(url, formBody)
         console.log('_SelectSaved', json)
         if (json.length > 0) {
-            Toast.show({ text1: I18n.t('savedToast') });
             if (flag == 1) {
+                Toast.show({ text1: I18n.t('savedToast') });
                 User.exSaved.push(no)
             } else {
+                Toast.show({ text1: I18n.t('savedContentsToast') });
                 User.placeSaved.push(no)
             }
         }
@@ -844,7 +864,7 @@ export default class PlaceDetail extends React.Component {
     }
 
     render() {
-        console.log(this.state.placeTimeDatas)
+        console.log(User.guest)
         return (
             <SafeAreaView>
                 <View style={{ backgroundColor: Colors.colorFFFFFF, width: '100%', height: '100%' }}>
@@ -859,9 +879,9 @@ export default class PlaceDetail extends React.Component {
                         <TouchableOpacity onPress={() => this._Bookmark(2, this.props.route.params.placeNo)}>
                             <Image source={User.placeSaved.includes(this.props.route.params.placeNo) == true ? imgBookmarkBlack : imgBookmark} style={{ width: 14, height: 18, tintColor: Colors.color000000, resizeMode: 'contain' }}></Image>
                         </TouchableOpacity>
-                        {/* <TouchableOpacity style={{ width: 24, height: 24, marginLeft: 14 }} onPress={() => this.setState({ sharedDialogVisible: true })} disabled={true}>
-                            <Image source={imgShared} style={{ width: 19, height: 16, resizeMode: 'contain', marginTop: 5, opacity: 0 }}></Image>
-                        </TouchableOpacity> */}
+                        <TouchableOpacity style={{ width: 24, height: 24, marginLeft: 14 }} onPress={() => this.setState({ sharedDialogVisible: true })} >
+                            <Image source={imgShared} style={{ width: 19, height: 16, resizeMode: 'contain', marginTop: 5, }}></Image>
+                        </TouchableOpacity>
                     </View>
                     <ScrollView style={{ backgroundColor: Colors.colorFFFFFF }}>
                         <View style={{ paddingLeft: 16, marginTop: 16, paddingRight: 19 }}>
@@ -877,7 +897,7 @@ export default class PlaceDetail extends React.Component {
                                     </View>
                                 </View>
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ContentReviewInsert', { placeNo: this.props.route.params.placeNo, repPath: this.state.representative_file_url, title: this.state.placeName, contents: this.state.singleInfo, parentFunction: this.parentFunction })} >
+                                <TouchableOpacity onPress={() => User.guest == true ? this.props.navigation.navigate('GuestLogin') : this.props.navigation.navigate('ContentReviewInsert', { placeNo: this.props.route.params.placeNo, repPath: this.state.representative_file_url, title: this.state.placeName, contents: this.state.singleInfo, parentFunction: this.parentFunction })} >
                                     <View style={{ paddingTop: 5, paddingBottom: 6, paddingLeft: 18, paddingRight: 17, backgroundColor: Colors.color2D7DC8, borderRadius: 100, opacity: 1 }}>
                                         <Text style={{ fontSize: 14, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: Colors.colorFFFFFF }}>{I18n.t('placeDetailReviewInsert')}</Text>
                                     </View>
@@ -986,7 +1006,7 @@ export default class PlaceDetail extends React.Component {
 
                         <View style={{ paddingLeft: 16, paddingRight: 16, marginTop: 12, }}>
                             <View style={{ paddingLeft: 12, paddingTop: 8, paddingBottom: 8, paddingRight: 12, backgroundColor: Colors.colorF4F4F4, borderRadius: 4 }}>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => this._OpenGps(this.state.lat, this.state.lng)}>
                                     <View style={{ flexDirection: 'row', }}>
                                         <Text style={{ flex: 0.2, fontSize: 12, fontFamily: 'Raleway-Regular', includeFontPadding: false, color: Colors.color4D4A4A }}>{I18n.t('placeDetailAddress')}</Text>
                                         <Text style={{ flex: 0.8, fontSize: 16, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: Colors.color000000 }}>{this.state.address + ', ' + this.state.addressDetail}</Text>
@@ -1179,13 +1199,13 @@ export default class PlaceDetail extends React.Component {
                             <View style={{ marginTop: 15, backgroundColor: Colors.colorF4F4F4, borderRadius: 4, paddingTop: 3, paddingBottom: 3, paddingLeft: 4, paddingRight: 4, height: 46, flexDirection: 'row' }}>
                                 <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ recommendedFalg: 0 })}>
                                     <View style={{ flex: 1, backgroundColor: (this.state.recommendedFalg == 0 ? Colors.colorFFFFFF : Colors.colorF4F4F4), alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 0 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('goodsPlaceText')}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 0 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('contents')}</Text>
                                     </View>
                                 </TouchableOpacity>
                                 <View style={{ width: 14 }}></View>
                                 <TouchableOpacity style={{ flex: 1 }} onPress={() => this.setState({ recommendedFalg: 1 })}>
                                     <View style={{ flex: 1, backgroundColor: (this.state.recommendedFalg == 1 ? Colors.colorFFFFFF : Colors.colorF4F4F4), alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 1 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('goodsExperienceText')}</Text>
+                                        <Text style={{ fontSize: 15, fontFamily: 'Raleway-Bold', includeFontPadding: false, color: (this.state.recommendedFalg == 1 ? Colors.color000000 : Colors.color5B5B5B) }}>{I18n.t('experiences')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>

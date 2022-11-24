@@ -47,18 +47,22 @@ export default class HomeTabs extends React.Component {
 
     componentDidMount() {
         AsyncStorage.getItem('firstRegion', (err, result) => {
-            console.log(result)
             if (result != null) {
                 const firstRegion = JSON.parse(result);
+                console.log(firstRegion)
                 this.setState({
                     selectedCountryNo: firstRegion.countryNo,
-                    selectedCityNo: firstRegion.cityNo || -1,
-                    selectedRegionNo: firstRegion.regionNo || -1,
+                    selectedCityNo: firstRegion.cityNo,
+                    selectedRegionNo: firstRegion.regionNo,
                     selectedCountry: Utils.Grinder(User.country.filter((el) => el.country_no == firstRegion.countryNo)[0]),
-                    selectedCity: Utils.Grinder(User.city.filter((el) => el.city_no == firstRegion.cityNo)[0]),
-                    selectedRegion: Utils.Grinder(User.region.filter((el) => el.town_no == firstRegion.regionNo)[0]),
+                    selectedCity: firstRegion.cityNo == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.city.filter((el) => el.city_no == firstRegion.cityNo)[0]),
+                    selectedRegion: firstRegion.regionNo == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.region.filter((el) => el.town_no == firstRegion.regionNo)[0]),
                 })
-                this._Experience()
+                if (User.guest == true) {
+                    this._Experience()
+                } else {
+                    this._Travel()
+                }
             }
         })
     }
@@ -118,13 +122,25 @@ export default class HomeTabs extends React.Component {
             else if (type == '2') {
                 title = I18n.t('homeCity')
                 // datas = this.state.cityDatas
-                datas = User.city.filter((value) => value.country_no == this.state.selectedCountryNo)
+                datas = [{
+                    category_no: this.state.selectedCountryNo,
+                    city_no: 0,
+                    ko: '전체',
+                    en: 'All',
+                    ja: '全国'
+                }, ...User.city.filter((value) => value.country_no == this.state.selectedCountryNo)]
             }
-            else if (type == '3' && this.state.selectedCityNo != -1) {
-                console.log(this.state.selectedCityNo)
+            else if (type == '3' && this.state.selectedCityNo != -1 && this.state.selectedCityNo != 0) {
                 title = I18n.t('homeRegion')
                 // datas = this.state.regionDatas
-                datas = User.region.filter((value) => value.city_no == this.state.selectedCityNo)
+                datas = [{
+                    category_no: this.state.selectedCountryNo,
+                    city_no: this.state.selectedCityNo,
+                    town_no: 0,
+                    ko: '전체',
+                    en: 'All',
+                    ja: '全国'
+                }, ...User.region.filter((value) => value.city_no == this.state.selectedCityNo)]
 
             }
             else if (type == '4') {
@@ -154,6 +170,9 @@ export default class HomeTabs extends React.Component {
                 restaurantsPlaceDatas: [],
                 restaurantsOffset: 0,
                 restaurantsTotal: 0,
+                repPlaceDatas: [],
+                repOffset: 0,
+                repTotal: 0,
             }, () => this._Experience());
             AsyncStorage.setItem('firstRegion', JSON.stringify({
                 'countryNo': this.state.selectedCountryNo, 'cityNo': this.state.selectedCityNo, 'regionNo': this.state.selectedRegionNo,
@@ -162,12 +181,15 @@ export default class HomeTabs extends React.Component {
             this.setState({
                 selectDialogVisible: false,
                 // selectedRegion: this._LangSelectText(this.state.regionDatas[value.selectedPosition].en, this.state.regionDatas[value.selectedPosition].ko, this.state.regionDatas[value.selectedPosition].ja),
-                selectedRegion: Utils.Grinder(User.region.filter((el) => el.town_no == value.no)[0]),
+                selectedRegion: value.no == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.region.filter((el) => el.town_no == value.no)[0]),
                 selectedRegionNo: value.no,
                 selectedRegionPosition: value.selectedPosition,
                 isFetching: true,
                 specialExperienceDatas: [],
                 restaurantsPlaceDatas: [],
+                repPlaceDatas: [],
+                repOffset: 0,
+                repTotal: 0,
                 restaurantsOffset: 0,
                 restaurantsTotal: 0,
             }, () => this._Experience())
@@ -178,7 +200,7 @@ export default class HomeTabs extends React.Component {
             this.setState({
                 selectDialogVisible: false,
                 // selectedCity: this._LangSelectText(this.state.cityDatas[value.selectedPosition].en, this.state.cityDatas[value.selectedPosition].ko, this.state.cityDatas[value.selectedPosition].ja),
-                selectedCity: Utils.Grinder(User.city.filter((el) => el.city_no == value.no)[0]),
+                selectedCity: value.no == 0 ? Utils.Grinder({ ko: '전체', en: 'All', ja: '全国' }) : Utils.Grinder(User.city.filter((el) => el.city_no == value.no)[0]),
                 selectedRegion: '',
                 selectedRegionPosition: -1,
                 selectedRegionNo: -1,
@@ -188,6 +210,9 @@ export default class HomeTabs extends React.Component {
                 isFetching: true,
                 specialExperienceDatas: [],
                 restaurantsPlaceDatas: [],
+                repPlaceDatas: [],
+                repOffset: 0,
+                repTotal: 0,
                 restaurantsOffset: 0,
                 restaurantsTotal: 0,
             }, () => this._Experience())
@@ -212,6 +237,9 @@ export default class HomeTabs extends React.Component {
                 isFetching: true,
                 specialExperienceDatas: [],
                 restaurantsPlaceDatas: [],
+                repPlaceDatas: [],
+                repOffset: 0,
+                repTotal: 0,
                 restaurantsOffset: 0,
                 restaurantsTotal: 0,
             }, () => this._Experience())
@@ -225,11 +253,23 @@ export default class HomeTabs extends React.Component {
         }
     }
 
-    _TranslateEnToKo(value, translateStr) {
+    _TranslateEatDrink(value) {
         if (I18n.currentLocale() == 'en-US') {
-            return translateStr + value
+            return 'The Authentic Taste of ' + value
+        } else if (I18n.currentLocale() == 'ko-KR') {
+            return value + '의 맛을 느껴보세요'
         } else {
-            return value + translateStr
+            return `グルメ特集：${value}編`
+        }
+    }
+
+    _TranslateSpecial(value) {
+        if (I18n.currentLocale() == 'en-US') {
+            return `Appreciate ${value} in a Special Way`
+        } else if (I18n.currentLocale() == 'ko-KR') {
+            return value + '을(를) 즐기는 특별한 방법'
+        } else {
+            return value + 'を楽しむ特別な方法'
         }
     }
 
@@ -325,27 +365,68 @@ export default class HomeTabs extends React.Component {
     }
 
     _Bookmark = (flag, no) => {
-        if (flag == 1) {
-            if (User.exSaved != null) {
-                if (User.exSaved.includes(no)) {
-                    this._DelectSaved(flag, no)
-                } else {
-                    this._SelectSaved(flag, no)
-                }
-            } else {
-                this._SelectSaved(flag, no)
-            }
-            console.log(User.exSaved)
+        if (User.guest == true) {
+            this.props.navigation.navigate('GuestLogin')
         } else {
-            if (User.exSaved != null) {
-                if (User.placeSaved.includes(no)) {
-                    this._DelectSaved(flag, no)
+            if (flag == 1) {
+                if (User.exSaved != null) {
+                    if (User.exSaved.includes(no)) {
+                        this._DelectSaved(flag, no)
+                    } else {
+                        this._SelectSaved(flag, no)
+                    }
                 } else {
                     this._SelectSaved(flag, no)
                 }
             } else {
-                this._SelectSaved(flag, no)
+                if (User.exSaved != null) {
+                    if (User.placeSaved.includes(no)) {
+                        this._DelectSaved(flag, no)
+                    } else {
+                        this._SelectSaved(flag, no)
+                    }
+                } else {
+                    this._SelectSaved(flag, no)
+                }
             }
+        }
+    }
+
+    async _Travel() {
+        const url = ServerUrl.SelectTravel
+        let formBody = {};
+        formBody = JSON.stringify({
+            "conditions": [
+                {
+                    "q": "=",
+                    "f": "user_no",
+                    "v": User.userNo
+                }, {
+                    "op": "AND",
+                    "q": ">=",
+                    "f": "end_dt",
+                    "v": "\'" + Moment(new Date()).format('YYYY-MM-DD') + "\'"
+                }
+            ]
+        })
+
+        const json = await NetworkCall.Select(url, formBody)
+        // console.log('_Travel', json)
+
+        if (json.length > 0) {
+            for (let i = 0; i < json.length; i++) {
+                const obj = {
+                    travelNo: json[i].travel_no,
+                    repPath: JSON.parse(json[i].contents_list).length > 0 && JSON.parse(json[i].contents_list)[0].agendas.length > 0 && JSON.parse(json[i].contents_list)[0].agendas[0].repPath,
+                    title: json[i].title,
+                    cityNo: json[i].city_no,
+                    countryNo: json[i].country_no,
+                }
+                this.state.tripPlanDatas.push(obj)
+            }
+            this._Experience()
+        } else {
+            this._Experience()
         }
     }
 
@@ -368,8 +449,9 @@ export default class HomeTabs extends React.Component {
                         "o": "DESC"
                     }, {
                         "q": "=",
-                        "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-                        "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+                        // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
                     }
                 ]
             })
@@ -386,8 +468,9 @@ export default class HomeTabs extends React.Component {
                         "o": "DESC"
                     }, {
                         "q": "=",
-                        "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-                        "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+                        // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+                        "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
                     }
                 ]
             })
@@ -428,12 +511,14 @@ export default class HomeTabs extends React.Component {
 
         const condition = [{
             "q": "=",
-            "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-            "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+            "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+            // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+            "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
         }, {
+            "op": "AND",
             "q": "order",
             "f": "e_dt",
-            "o": "ASC"
+            "o": "DESC"
         }, {
             "op": "AND",
             "q": "=",
@@ -465,7 +550,7 @@ export default class HomeTabs extends React.Component {
         for (let i = 0; i < json.list.length; i++) {
             if (json.list[i].image_representative != null) {
                 const obj = {
-                    title: Utils.GrinderContents(JSON.parse(json.list[i].place_name.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"'))),
+                    title: Utils.GrinderContents(JSON.parse(json.list[i].place_name)).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"'),
                     rate: json.list[i].rate,
                     reviewCnt: json.list[i].review_cnt,
                     // currency: json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency,
@@ -499,12 +584,14 @@ export default class HomeTabs extends React.Component {
 
         const condition = [{
             "q": "=",
-            "f": this.state.selectedRegion.length != 0 ? 'town' : this.state.selectedCity.length != 0 ? 'city' : 'country',
-            "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+            "f": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? 'town' : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? 'city' : 'country',
+            // "v": this.state.selectedRegion.length != 0 ? this.state.selectedRegionNo : this.state.selectedCity.length != 0 ? this.state.selectedCityNo : this.state.selectedCountryNo
+            "v": (this.state.selectedRegion.length != 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegionNo : (this.state.selectedCity.length != 0 && this.state.selectedCityNo != 0) ? this.state.selectedCityNo : this.state.selectedCountryNo
         }, {
+            "op": "AND",
             "q": "order",
             "f": "e_dt",
-            "o": "ASC"
+            "o": "DESC"
         }, {
             "op": "AND",
             "q": "=",
@@ -529,28 +616,25 @@ export default class HomeTabs extends React.Component {
             })
         }
 
-        console.log(formBody)
+        // console.log(formBody)
 
         const json = await NetworkCall.Select(url, formBody)
-
         for (let i = 0; i < json.list.length; i++) {
-            if (json.list[i].image_representative != null) {
-                const obj = {
-                    title: Utils.GrinderContents(JSON.parse(json.list[i].place_name.replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"'))),
-                    rate: json.list[i].rate,
-                    reviewCnt: json.list[i].review_cnt,
-                    // currency: json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency,
-                    price: json.list[i].price,
-                    city: json.list[i].city,
-                    country: json.list[i].country,
-                    saved: 0,
-                    town: Utils.Grinder(User.region.filter((el) => el.town_no == json.list[i].town)[0]),
-                    place_no: json.list[i].place_no,
-                    representative_file_url: ServerUrl.Server + JSON.parse(json.list[i].image_representative),
-                    category: JSON.parse(json.list[i].categories.replace(/'/gi, ''))
-                }
-                this.state.repPlaceDatas.push(obj)
+            const obj = {
+                title: Utils.GrinderContents(JSON.parse(json.list[i].place_name)).replace(/&#039;/gi, '\'').replace(/&quot;/gi, '\"'),
+                rate: json.list[i].rate,
+                reviewCnt: json.list[i].review_cnt,
+                // currency: json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency,
+                price: json.list[i].price,
+                city: json.list[i].city,
+                country: json.list[i].country,
+                saved: 0,
+                town: Utils.Grinder(User.region.filter((el) => el.town_no == json.list[i].town)[0]),
+                place_no: json.list[i].place_no,
+                representative_file_url: json.list[i].image_representative != null ? ServerUrl.Server + JSON.parse(json.list[i].image_representative) : null,
+                category: JSON.parse(json.list[i].categories.replace(/'/gi, ''))
             }
+            this.state.repPlaceDatas.push(obj)
         }
         this.setState({
             isFetching: false,
@@ -570,12 +654,12 @@ export default class HomeTabs extends React.Component {
         })
 
         const json = await NetworkCall.Select(url, formBody)
-        console.log('_SelectSaved', json)
         if (json.length > 0) {
-            Toast.show({ text1: I18n.t('savedToast') });
             if (flag == 1) {
+                Toast.show({ text1: I18n.t('savedToast') });
                 User.exSaved.push(no)
             } else {
+                Toast.show({ text1: I18n.t('savedContentsToast') });
                 User.placeSaved.push(no)
             }
         }
@@ -593,7 +677,6 @@ export default class HomeTabs extends React.Component {
         })
 
         const json = await NetworkCall.Select(url, formBody)
-        console.log('_DelectSaved', json)
         if (json.affectedRows == 1) {
             if (flag == 1) {
                 const newList = User.exSaved.filter((item) => item !== no);
@@ -607,31 +690,35 @@ export default class HomeTabs extends React.Component {
     }
 
     render() {
+        console.log(User.guest)
         if (User.exSaved == undefined) {
             User.exSaved = [];
             User.placeSaved = [];
         }
-        console.log(User.exSaved)
         return (
             <SafeAreaView>
                 <View style={{ width: '100%', height: '100%', backgroundColor: Colors.colorFFFFFF }}>
                     {this._CallDialog()}
-                    <ScrollView >
+                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                         <View>
                             <View style={{ width: '100%', paddingLeft: 16, paddingTop: 11, paddingBottom: 15 }}>
                                 <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: 'Raleway-Bold', includeFontPadding: false, }}>{I18n.t('homeTabTitle')}</Text>
-                                <ScrollView horizontal={true} style={{ marginTop: 12 }}>
-                                    <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Main', { screen: I18n.t('saved'), })}>
+                                <ScrollView horizontal={true} style={{ marginTop: 12 }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+                                    <TouchableWithoutFeedback onPress={() => User.guest == true ? this.props.navigation.navigate('GuestLogin') : this.props.navigation.navigate('Main', { screen: I18n.t('saved'), })}>
+                                        {/* <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('TravelInvite')}> */}
                                         <View style={{ width: 60, height: 60, backgroundColor: Colors.colorF5F5F5, borderRadius: 30, alignItems: 'center', justifyContent: 'center' }}>
                                             <Image source={imgPlus} style={{ width: 14, height: 14, resizeMode: 'contain' }}></Image>
                                         </View>
                                     </TouchableWithoutFeedback>
 
                                     {this.state.tripPlanDatas.map((item, index) => (
-                                        <View key={index} style={{ marginLeft: 12, alignItems: 'center', justifyContent: 'center', }}>
-                                            <Image resizeMethod='resize' source={imgRegionBg} style={{ width: 60, height: 60, borderRadius: 30, resizeMode: 'cover' }} ></Image>
-                                            <Text style={{ fontSize: 11, color: Colors.color000000, fontFamily: 'Raleway-Medium', includeFontPadding: false, marginTop: 4 }}>{item}</Text>
-                                        </View>
+                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('SavedScheduleMain', { travelNo: item.travelNo, position: 'Main' })}>
+                                            <View key={index} style={{ marginLeft: 12, alignItems: 'center', justifyContent: 'center', }}>
+                                                <FastImage style={{ width: 60, height: 60, borderRadius: 30, resizeMode: 'cover', backgroundColor: Colors.colorB7B7B7 }} source={{ uri: ServerUrl.Server + ((item.cityNo == -1 || item.cityNo == 0) == true ? User.country.filter(el => el.country_no == item.countryNo)[0].img_path : User.city.filter(el => el.city_no == item.cityNo)[0].img_path), headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal, }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                                <Text style={{ fontSize: 11, color: Colors.color000000, fontFamily: 'Raleway-Medium', includeFontPadding: false, marginTop: 4 }}>{item.title}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+
                                     ))}
                                     <View style={{ marginRight: 16 }}></View>
                                 </ScrollView>
@@ -673,7 +760,7 @@ export default class HomeTabs extends React.Component {
                             <View style={{ padding: 16 }}>
                                 <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Main', { screen: I18n.t('experiences'), params: { country: this.state.selectedCountryNo, city: this.state.selectedCityNo, region: this.state.selectedRegionNo } })}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{this._TranslateEnToKo(this.state.selectedRegion.length > 0 ? this.state.selectedRegion : this.state.selectedCity.length > 0 ? this.state.selectedCity : this.state.selectedCountry, I18n.t('homeExperiencesTitle'))}</Text>
+                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{I18n.t('homeExperiencesTitle')}</Text>
                                         <Image source={imgRightArrow} style={{ width: 8, height: 14, marginLeft: 9 }} ></Image>
                                     </View>
                                 </TouchableWithoutFeedback>
@@ -682,15 +769,15 @@ export default class HomeTabs extends React.Component {
 
                                 {this.state.restaurantsPlaceDatas.length > 0 && <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Main', { screen: I18n.t('contents'), params: { country: this.state.selectedCountryNo, city: this.state.selectedCityNo, region: this.state.selectedRegionNo, categories: [User.contentsCategory[0], User.contentsCategory[1]] } })}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 32 }}>
-                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{this._TranslateEnToKo(this.state.selectedRegion.length > 0 ? this.state.selectedRegion : this.state.selectedCity.length > 0 ? this.state.selectedCity : this.state.selectedCountry, I18n.t('homeEatDrinkTitle'))}</Text>
+                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{this._TranslateEatDrink((this.state.selectedRegion.length > 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegion : (this.state.selectedCity.length > 0 && this.state.selectedCityNo != 0) ? this.state.selectedCity : this.state.selectedCountry)}</Text>
                                         <Image source={imgRightArrow} style={{ width: 8, height: 14, marginLeft: 9 }} ></Image>
                                     </View>
                                 </TouchableWithoutFeedback>}
 
-                                <FlatList keyExtractor={(item, index) => index.toString()} style={{ marginTop: 18 }} horizontal showsHorizontalScrollIndicator={false} data={this.state.restaurantsPlaceDatas}
+                                <FlatList keyExtractor={(item, index) => index.toString()} style={{ marginTop: 18 }} horizontal showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} data={this.state.restaurantsPlaceDatas}
                                     onEndReached={() => {
                                         (this.state.restaurantsTotal > this.state.restaurantsPlaceDatas.length) && this.setState({ isFetching: true, restaurantsOffset: this.state.restaurantsOffset + 8 }, () => { this._RestaurantsPlace(1) })
-                                        console.log(this.state.restaurantsTotal, + ' ' + this.state.restaurantsPlaceDatas.length)
+
                                     }}
                                     // onEndReachedThreshold={0.5}
                                     renderItem={(obj) => {
@@ -725,7 +812,7 @@ export default class HomeTabs extends React.Component {
 
                                 {this.state.repPlaceDatas.length > 0 && <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Main', { screen: I18n.t('contents'), params: { country: this.state.selectedCountryNo, city: this.state.selectedCityNo, region: this.state.selectedRegionNo, categories: [User.contentsCategory[3], User.contentsCategory[5], User.contentsCategory[7], User.contentsCategory[8]] } })}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 32 }}>
-                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{this._TranslateEnToKo(this.state.selectedRegion.length > 0 ? this.state.selectedRegion : this.state.selectedCity.length > 0 ? this.state.selectedCity : this.state.selectedCountry, I18n.t('homeMustPlacesTitle'))}</Text>
+                                        <Text style={{ fontSize: 16, color: Colors.color000000, fontFamily: "Raleway-Bold", includeFontPadding: false }}>{this._TranslateSpecial((this.state.selectedRegion.length > 0 && this.state.selectedRegionNo != 0) ? this.state.selectedRegion : (this.state.selectedCity.length > 0 && this.state.selectedCityNo != 0) ? this.state.selectedCity : this.state.selectedCountry)}</Text>
                                         <Image source={imgRightArrow} style={{ width: 8, height: 14, marginLeft: 9 }} ></Image>
                                     </View>
                                 </TouchableWithoutFeedback>}
@@ -733,7 +820,7 @@ export default class HomeTabs extends React.Component {
                                 <FlatList keyExtractor={(item, index) => index.toString()} style={{ marginTop: 18 }} horizontal showsHorizontalScrollIndicator={false} data={this.state.repPlaceDatas}
                                     onEndReached={() => {
                                         (this.state.repTotal > this.state.repPlaceDatas.length) && this.setState({ isFetching: true, repOffset: this.state.repOffset + 8 }, () => { this._RepPlace() })
-                                        console.log(this.state.repTotal, + ' ' + this.state.repPlaceDatas.length)
+
                                     }}
                                     // onEndReachedThreshold={0.5}
                                     renderItem={(obj) => {
@@ -741,7 +828,7 @@ export default class HomeTabs extends React.Component {
                                             <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('PlaceDetail', { placeNo: obj.item.place_no })}>
                                                 <View style={{ width: 160, borderRadius: 4, marginLeft: (obj.index == 0 ? 0 : 12), }}>
                                                     <View>
-                                                        <FastImage style={{ width: '100%', height: 160 * 1.3937, borderRadius: 4 }} source={{ uri: obj.item.representative_file_url, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage>
+                                                        {obj.item.representative_file_url != null ? <FastImage style={{ width: '100%', height: 160 * 1.3937, borderRadius: 4 }} source={{ uri: obj.item.representative_file_url, headers: { Authorization: 'someAuthToken' }, priority: FastImage.priority.normal }} resizeMode={FastImage.resizeMode.cover}></FastImage> : <View style={{ width: '100%', height: 160 * 1.3937, borderRadius: 4, backgroundColor: Colors.colorF4F4F4 }}></View>}
                                                         <TouchableOpacity style={{ position: 'absolute', top: 8, right: 7 }} onPress={() => this._Bookmark(2, obj.item.place_no)}>
                                                             <ImageBackground source={imgCircleSaveBg} style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center' }}>
                                                                 <Image source={User.placeSaved != null && User.placeSaved.includes(obj.item.place_no) == true ? imgBookmarkBlack : imgBookmark} style={{ width: 12, height: 15, tintColor: Colors.colorFFFFFF }}></Image>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Image, TouchableWithoutFeedback, Text, ScrollView, TextInput, Modal, FlatList, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView, View, Image, TouchableWithoutFeedback, Text, ScrollView, TextInput, Modal, FlatList, ImageBackground, TouchableOpacity, Dimensions, BackHandler } from 'react-native';
 import I18n from '../../lang/i18n';
 import Colors from '../../Common/Colos';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -17,12 +17,23 @@ const imgGoogle = require('../../../assets/ic_saved_google.png');
 export default class FromGoogle extends React.Component {
     constructor(props) {
         super(props)
+        this.backAction = this.backAction.bind(this);
     }
 
     componentDidMount() {
-        console.log(I18n.currentLocale())
+        BackHandler.addEventListener("hardwareBackPress", this.backAction);
         Geocoder.init("AIzaSyCePbzWSXlyg8wUqrB0yvWPOLzq0maVfdI", { language: I18n.currentLocale().substring(0, 2) });
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.backAction);
+    }
+
+    backAction() {
+        this.props.route.params.parentFuntion(null, -1, 11)
+        this.props.navigation.goBack()
+        return true;
+    };
 
     state = {
         lat: 0,

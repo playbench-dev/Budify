@@ -70,12 +70,15 @@ export default class Reserve extends React.Component {
         couponDatas: [],
         degreeCheck: false,
         selectDay: Moment(new Date()).format('YYYY-MM-DD'),
+        calendarMonth: Moment(new Date()).format('YYYY-MM'),
         scheduleDatas: [],
         selectScheduleNo: -1,
         selectUserCouponNo: -1,
         phone: '',
         message: '',
         selectCoupon: null,
+        isScheduleData: [],
+        isScheduleMarked: null,
     }
 
     componentDidMount() {
@@ -117,7 +120,6 @@ export default class Reserve extends React.Component {
             ]
         })
         const json = await NetworkCall.Select(url, formBody)
-
         if (json.length > 0) {
             let representative = [];
             if (json[0].representative_file_url == null || json[0].representative_file_url.length == 0) {
@@ -222,6 +224,7 @@ export default class Reserve extends React.Component {
     }
 
     async _Schedule() {
+        console.log('aa', this.state.calendarMonth)
         const url = ServerUrl.SelectExSchedule
         let formBody = JSON.stringify({
             // "ex_no": this.props.route.params.exNo,
@@ -231,19 +234,18 @@ export default class Reserve extends React.Component {
                     "op": "AND",
                     "q": "like",
                     "f": "datetime",
-                    "str": this.state.selectDay
+                    "str": this.state.calendarMonth
                 },
                 {
                     "op": "AND",
                     "q": "=",
                     "f": "ex_no",
                     "v": this.props.route.params.exNo
-                    // "v": 40
                 }
             ]
         })
         const json = await NetworkCall.Select(url, formBody)
-        console.log(TAG, json);
+        console.log(TAG, json[1]);
         if (json[1].length > 0) {
             for (let i = 0; i < json[1].length; i++) {
                 const obj = {
@@ -255,7 +257,7 @@ export default class Reserve extends React.Component {
                     status: json[1][i].status,
                     dateTime: json[1][i].datetime
                 }
-                console.log(json[1][i].datetime)
+                this._setIsSchedul(Moment(json[1][i].datetime).format('YYYY-MM-DD'))
                 this.state.scheduleDatas.push(obj)
             }
         } else {
@@ -316,6 +318,19 @@ export default class Reserve extends React.Component {
             })
     }
 
+    _setIsSchedul = (date) => {
+        this.state.isScheduleData = this.state.isScheduleData.concat(date)
+        let obj = this.state.isScheduleData.reduce((c, v) => Object.assign({}, this.state.isScheduleMarked, {
+            [v]: {
+                marked: true,
+                dotColor: Colors.color289FAF,
+                selected: this.state.selectDay == date ? true : false,
+            }
+        }), {});
+        this.state.isScheduleMarked = obj;
+        // console.log(obj)
+    }
+
     _setSelectedDates = (date) => {
         this.state.scheduleDatas = []
         this.state._markedDates = []
@@ -334,6 +349,7 @@ export default class Reserve extends React.Component {
         this.state.marked = obj;
         this.state.selectDay = date;
         this._Schedule()
+        // this.setState({ isFetching: false, marked: obj, selectDay: date })
     }
 
     render() {
@@ -380,14 +396,15 @@ export default class Reserve extends React.Component {
                                         this._setSelectedDates(day.year + "-" + day.dateString.split('-')[1] + "-" + day.dateString.split('-')[2])
                                         // console.log(day)
                                     }}
+                                    onMonthChange={month => this.setState({ calendarMonth: month.dateString.substring(0, 7), scheduleDatas: [], isFetching: true, isScheduleData: [], isScheduleMarked: null }, () => this._Schedule())}
                                     markingType={'dot'}
                                     style={{ width: '100%' }}
-                                    markedDates={this.state.marked}
+                                    markedDates={this.state.isScheduleMarked}
                                     enableSwipeMonths={true}
                                 />
                             </View>
                             <ScrollView horizontal style={{ marginTop: 12 }}>
-                                {this.state.scheduleDatas.map((item, index) => (
+                                {this.state.scheduleDatas.filter(el => Moment(el.dateTime).format('YYYY-MM-DD') == this.state.selectDay).map((item, index) => (
                                     <TouchableOpacity onPress={() => item.peopleCapacity - item.peopleCurrent > 0 && this.setState({ selectScheduleNo: this.state.selectScheduleNo == item.scheduleNo ? -1 : item.scheduleNo })}>
                                         <View style={{ borderRadius: 4, borderWidth: 1, borderColor: this.state.selectScheduleNo == item.scheduleNo ? Colors.color2D7DC8 : Colors.colorB7B7B7, backgroundColor: this.state.selectScheduleNo == item.scheduleNo ? 'rgba(154, 206, 255, 0.22)' : Colors.colorFFFFFF, alignItems: 'center', justifyContent: 'center', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, marginLeft: index == 0 ? 0 : 12 }}>
                                             <Text style={{ fontSize: 12, fontFamily: 'Raleway-Medium', includeFontPadding: false, color: this.state.selectScheduleNo == item.scheduleNo ? Colors.color2D7DC8 : Colors.color000000, }}>{item.dateTime.substring(10, 16)}</Text>
@@ -396,7 +413,6 @@ export default class Reserve extends React.Component {
                                     </TouchableOpacity>
 
                                 ))}
-
                             </ScrollView>
                         </View>
 

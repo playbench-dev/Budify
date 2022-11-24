@@ -11,7 +11,7 @@
     <queries>
       <package android:name="com.ahnlab.v3mobileplus"/>
       <package android:name="com.TouchEn.mVaccine.webs"/>
-
+      <package android:name="com.instagram.android"/>
       <package android:name="com.wooricard.wpay"/>
       <package android:name="com.wooricard.smartapp"/>
       <package android:name="com.wooribank.smart.npib"/>
@@ -84,6 +84,8 @@
       android:usesCleartextTraffic="true"
       android:requestLegacyExternalStorage="true">
 
+      <meta-data android:name="com.snapchat.kit.sdk.clientId" 
+          android:value="462311775446639" />
       <meta-data 
           android:name="com.facebook.sdk.ApplicationId"
           android:value="@string/facebook_app_id"/>
@@ -108,11 +110,19 @@
           <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
 
+        <intent-filter android:autoVerify="true">
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.DEFAULT"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:host="reactnativebudify.page.link" android:scheme="http"/>
+            <data android:host="reactnativebudify.page.link" android:scheme="https"/>
+        </intent-filter>
+
         <intent-filter>
           <action android:name="android.intent.action.VIEW" />
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
-          <data android:host="kakaolink" android:scheme="kakao{카카오 네이티브 앱키}" />
+          <data android:host="kakaolink" android:scheme="kakao273341293a4bdf5c1eeaaaa33b0ffd7f" />
         </intent-filter>
       </activity>
     </application>

@@ -205,7 +205,7 @@ export default class HostExperiencesManage extends React.Component {
                     ) : (
                         <FlatList keyExtractor={(item, index) => index.toString()} data={this.state.datas} renderItem={(obj) => {
                             return (
-                                <TouchableWithoutFeedback>
+                                <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('GoodsDetail', { exNo: obj.item.exNo })}>
                                     <View style={{ flexDirection: 'row', paddingLeft: 16, paddingRight: 16, marginTop: 20, alignItems: 'center' }}>
                                         <Image style={{ width: 80, height: 80, resizeMode: 'cover', borderRadius: 40 }} source={{ uri: ServerUrl.Server + obj.item.repImage }}></Image>
                                         <View style={{ marginLeft: 15, flex: 1 }}>

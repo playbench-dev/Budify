@@ -43,12 +43,18 @@ export default class MyExperiences extends React.Component {
                     "q": "=",
                     "f": "user_no",
                     "v": User.userNo,
-                }
+                },
+                // {
+                //     "op": "AND",
+                //     "q": ">=",
+                //     "f": "datetime",
+                //     "v": "\'" + Moment(new Date()).format('YYYY-MM-DD') + "\'"
+                // }
             ]
         })
         const json = await NetworkCall.Select(url, formBody)
 
-        console.log(json)
+        // console.log(json)
 
         let upComingList = [];
         let pastList = [];
@@ -64,7 +70,7 @@ export default class MyExperiences extends React.Component {
                             pictureUrl: JSON.parse(json[i].exInfo.representative_file_url)[0],
                             title: json[i].title,
                             numberParticipants: json[i].amount,
-                            payment: (json[0].currency == "USD" ? "$" : json[0].currency == "KRW" ? "₩" : json[0].currency == "EUR" ? "€" : json[0].currency == "JPY" ? "¥" : json[0].currency) + JSON.parse(json[i].payInfo).amount,
+                            payment: (json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency) + JSON.parse(json[i].payInfo).amount,
                             status: 1,
                             orderNo: json[i].order_no,
                             exNo: json[i].ex_no,
@@ -79,7 +85,7 @@ export default class MyExperiences extends React.Component {
                             pictureUrl: JSON.parse(json[i].exInfo.representative_file_url)[0],
                             title: json[i].title,
                             numberParticipants: json[i].amount,
-                            payment: (json[0].currency == "USD" ? "$" : json[0].currency == "KRW" ? "₩" : json[0].currency == "EUR" ? "€" : json[0].currency == "JPY" ? "¥" : json[0].currency) + JSON.parse(json[i].payInfo).amount,
+                            payment: (json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency) + JSON.parse(json[i].payInfo).amount,
                             status: 1,
                             orderNo: json[i].order_no,
                             exNo: json[i].ex_no,
@@ -89,21 +95,23 @@ export default class MyExperiences extends React.Component {
                     }
                     pastList.push(pastObj)
                 } else if (json[i].status == '3') {
-                    const cancelObj = {
-                        title: json[i].exScheduleInfo.datetime.substring(0, 4),
-                        data: {
-                            date: json[i].exScheduleInfo.datetime,
-                            pictureUrl: JSON.parse(json[i].exInfo.representative_file_url)[0],
-                            title: json[i].title,
-                            numberParticipants: json[i].amount,
-                            payment: (json[0].currency == "USD" ? "$" : json[0].currency == "KRW" ? "₩" : json[0].currency == "EUR" ? "€" : json[0].currency == "JPY" ? "¥" : json[0].currency) + JSON.parse(json[i].payInfo).amount,
-                            status: 1,
-                            orderNo: json[i].order_no,
-                            reseaon: json[i].cancel_reason,
-                            exNo: json[i].ex_no,
+                    if (json[i].payInfo != null) {
+                        const cancelObj = {
+                            title: json[i].exScheduleInfo.datetime.substring(0, 4),
+                            data: {
+                                date: json[i].exScheduleInfo.datetime,
+                                pictureUrl: JSON.parse(json[i].exInfo.representative_file_url)[0],
+                                title: json[i].title,
+                                numberParticipants: json[i].amount,
+                                payment: (json[i].currency == "USD" ? "$" : json[i].currency == "KRW" ? "₩" : json[i].currency == "EUR" ? "€" : json[i].currency == "JPY" ? "¥" : json[i].currency) + JSON.parse(json[i].payInfo).amount,
+                                status: 1,
+                                orderNo: json[i].order_no,
+                                reseaon: json[i].cancel_reason,
+                                exNo: json[i].ex_no,
+                            }
                         }
+                        cancelList.push(cancelObj)
                     }
-                    cancelList.push(cancelObj)
                 } else {
                     console.log('else')
                 }
